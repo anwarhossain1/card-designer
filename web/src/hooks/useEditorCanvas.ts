@@ -5,6 +5,7 @@ import { Point, type Canvas, type TPointerEvent } from "fabric";
 import { ZOOM } from "@/config/document";
 import { createArtworkCanvas } from "@/lib/canvas/setup";
 import {
+  clampViewportToCard,
   clampZoom,
   fitToScreen as fitCanvasToScreen,
   getCardScreenRect,
@@ -148,6 +149,7 @@ export function useEditorCanvas() {
         preserveCenterOnResize(canvas, sizeRef.current, next);
         sizeRef.current = next;
         canvas.setDimensions(next);
+        clampViewportToCard(canvas, next);
         syncLayers(next);
       });
       observer.observe(container);
@@ -196,6 +198,7 @@ export function useEditorCanvas() {
         event.clientX - lastPointer.current.x,
         event.clientY - lastPointer.current.y,
       );
+      clampViewportToCard(canvas, sizeRef.current);
       lastPointer.current = { x: event.clientX, y: event.clientY };
       canvas.setCursor("grabbing");
     };
@@ -244,6 +247,7 @@ export function useEditorCanvas() {
         ? [-event.deltaY, 0]
         : [-event.deltaX, -event.deltaY];
       panBy(canvas, dx, dy);
+      clampViewportToCard(canvas, sizeRef.current);
     };
 
     container.addEventListener("wheel", onWheel, { passive: false });

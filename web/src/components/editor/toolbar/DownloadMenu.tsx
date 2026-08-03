@@ -125,7 +125,7 @@ export function DownloadMenu() {
               ) : null}
 
               {error ? (
-                <p role="alert" className="text-xs text-red-600">
+                <p role="alert" className="text-xs text-danger-ink">
                   {error}
                 </p>
               ) : null}

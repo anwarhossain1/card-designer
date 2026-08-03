@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
 import { Providers } from "./providers";
+import { THEME_INIT_SCRIPT } from "@/lib/theme/theme";
 import "./globals.css";
 
 const inter = Inter({
@@ -28,7 +29,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${inter.variable} h-full`}>
+    /* suppressHydrationWarning: the inline script sets data-theme before React. */
+    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+          suppressHydrationWarning
+        />
+      </head>
       <body className="min-h-full">
         <Providers>{children}</Providers>
       </body>

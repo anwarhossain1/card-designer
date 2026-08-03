@@ -36,6 +36,12 @@
   --color-workspace: #e8e9ed;
   --color-hairline: #e4e6eb;
 
+  /* Status surfaces — semantic so notices flip with the theme. */
+  --color-warning-surface: #fffbeb;
+  --color-warning-ink: #92400e;
+  --color-danger-surface: #fef2f2;
+  --color-danger-ink: #b91c1c;
+
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
 
   --radius-xs: 4px;
@@ -46,6 +52,56 @@
 
   --shadow-panel: 0 1px 2px rgb(17 20 28 / 0.06), 0 4px 16px rgb(17 20 28 / 0.06);
   --shadow-pop: 0 8px 32px rgb(17 20 28 / 0.14);
+}
+
+/*
+ * Dark theme.
+ *
+ * The same token names are redeclared, so every component that already reads
+ * `bg-panel` or `text-ink-900` flips without touching a single class. The ink
+ * scale inverts (900 stays "most prominent text", 50 stays "faintest surface"),
+ * which is why components never need per-theme branches.
+ *
+ * `data-theme` is resolved before first paint by the inline script in the
+ * layout, including for the "system" setting — so there is no media query here
+ * and no flash of the wrong theme.
+ */
+:root[data-theme="dark"] {
+  --color-ink-50: #191c24;
+  --color-ink-100: #22262f;
+  --color-ink-200: #2f343f;
+  --color-ink-300: #454b59;
+  --color-ink-400: #7b8393;
+  --color-ink-500: #98a0ae;
+  --color-ink-600: #b6bdc9;
+  --color-ink-700: #d0d5dd;
+  --color-ink-800: #e6e9ee;
+  --color-ink-900: #f4f6f8;
+
+  --color-panel: #14171e;
+  --color-panel-muted: #1a1e26;
+  --color-workspace: #0d0f14;
+  --color-hairline: #272c36;
+
+  /*
+   * Brand tints are surfaces in light mode, so they darken. The mid-tones move
+   * the other way: brand-700 is text sitting on those tints, and brand-600 is
+   * button fill that still has to carry white text.
+   */
+  --color-brand-50: #1e1b3a;
+  --color-brand-100: #2a2352;
+  --color-brand-600: #7f5cff;
+  --color-brand-700: #a794ff;
+
+  --color-warning-surface: #2d2410;
+  --color-warning-ink: #fbd38d;
+  --color-danger-surface: #2e1517;
+  --color-danger-ink: #fca5a5;
+
+  --shadow-panel: 0 1px 2px rgb(0 0 0 / 0.4), 0 4px 16px rgb(0 0 0 / 0.35);
+  --shadow-pop: 0 8px 32px rgb(0 0 0 / 0.55);
+
+  color-scheme: dark;
 }
 
 @layer base {

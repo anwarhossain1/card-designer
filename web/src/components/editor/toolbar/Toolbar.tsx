@@ -13,6 +13,7 @@ import {
   Undo2,
 } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { DownloadMenu } from "./DownloadMenu";
 import { useEditorStore } from "@/store/editorStore";
 import { useCanvas } from "../canvas/CanvasProvider";
@@ -124,6 +125,7 @@ export function Toolbar() {
       </div>
 
       <div className="flex items-center gap-2">
+        <ThemeToggle />
         <DownloadMenu />
       </div>
     </header>

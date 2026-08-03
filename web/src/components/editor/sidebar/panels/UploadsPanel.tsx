@@ -60,7 +60,10 @@ export function UploadsPanel() {
       </div>
 
       {error ? (
-        <p role="alert" className="rounded-md bg-red-50 px-3 py-2 text-xs text-red-700">
+        <p
+          role="alert"
+          className="rounded-md bg-danger-surface px-3 py-2 text-xs text-danger-ink"
+        >
           {error}
         </p>
       ) : null}

@@ -2,6 +2,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
 import { Logo } from "@/components/ui/Logo";
+import { ThemeToggle } from "@/components/ui/ThemeToggle";
 
 const LINKS = [
   { href: "#templates", label: "Templates" },
@@ -27,9 +28,12 @@ export function Navbar() {
           ))}
         </nav>
 
-        <Link href="/editor">
-          <Button size="sm">Start Designing</Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <ThemeToggle size="sm" />
+          <Link href="/editor">
+            <Button size="sm">Start Designing</Button>
+          </Link>
+        </div>
       </Container>
     </header>
   );

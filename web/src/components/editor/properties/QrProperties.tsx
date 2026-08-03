@@ -39,7 +39,7 @@ export function QrProperties({ target }: { target: FabricObject }) {
       />
 
       {isEmpty ? (
-        <p className="rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-800">
+        <p className="rounded-md bg-warning-surface px-2 py-1.5 text-[11px] text-warning-ink">
           Fill in the details to update the code — the card still shows the last
           one that encoded.
         </p>
@@ -48,7 +48,7 @@ export function QrProperties({ target }: { target: FabricObject }) {
           className={
             isReadable
               ? "text-[11px] text-ink-400"
-              : "rounded-md bg-amber-50 px-2 py-1.5 text-[11px] text-amber-800"
+              : "rounded-md bg-warning-surface px-2 py-1.5 text-[11px] text-warning-ink"
           }
         >
           {isReadable

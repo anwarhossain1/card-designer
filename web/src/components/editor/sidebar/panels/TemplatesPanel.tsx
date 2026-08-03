@@ -76,7 +76,7 @@ export function TemplatesPanel() {
   return (
     <div className="space-y-3">
       {hasContent ? (
-        <p className="rounded-lg bg-amber-50 px-3 py-2 text-[11px] leading-relaxed text-amber-800">
+        <p className="rounded-lg bg-warning-surface px-3 py-2 text-[11px] leading-relaxed text-warning-ink">
           Applying a template replaces what is on the card. Undo brings your
           design back.
         </p>

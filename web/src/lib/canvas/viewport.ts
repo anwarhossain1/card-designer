@@ -86,3 +86,43 @@ export function preserveCenterOnResize(
   vpt[5] += (next.height - previous.height) / 2;
   canvas.setViewportTransform(vpt);
 }
+
+/** How much of the card must stay on screen, in pixels. */
+const MIN_VISIBLE = 48;
+
+/**
+ * Pulls the card back if it has left the workspace.
+ *
+ * Panning can be over-shot, and a transient container size during mount can
+ * throw the transform a full viewport off — after which the canvas looks
+ * empty with no obvious way back. Clamping after every viewport change makes
+ * losing the card impossible.
+ *
+ * Returns true when it had to intervene.
+ */
+export function clampViewportToCard(canvas: Canvas, container: Size): boolean {
+  const { x, y, width, height } = getCardScreenRect(canvas);
+
+  const dx =
+    x + width < MIN_VISIBLE
+      ? MIN_VISIBLE - (x + width)
+      : x > container.width - MIN_VISIBLE
+        ? container.width - MIN_VISIBLE - x
+        : 0;
+
+  const dy =
+    y + height < MIN_VISIBLE
+      ? MIN_VISIBLE - (y + height)
+      : y > container.height - MIN_VISIBLE
+        ? container.height - MIN_VISIBLE - y
+        : 0;
+
+  if (dx === 0 && dy === 0) return false;
+
+  const vpt = [...canvas.viewportTransform] as TMat2D;
+  vpt[4] += dx;
+  vpt[5] += dy;
+  canvas.setViewportTransform(vpt);
+  canvas.requestRenderAll();
+  return true;
+}
