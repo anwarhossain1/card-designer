@@ -10,6 +10,7 @@ import { IconsPanel } from "./panels/IconsPanel";
 import { LayersPanel } from "./panels/LayersPanel";
 import { UploadsPanel } from "./panels/UploadsPanel";
 import { BackgroundPanel } from "./panels/BackgroundPanel";
+import { QrPanel } from "./panels/QrPanel";
 
 /**
  * Drawer beside the rail. Panels are registered here as their features land;
@@ -54,6 +55,8 @@ export function PanelDrawer() {
           <UploadsPanel />
         ) : activePanel === "background" ? (
           <BackgroundPanel />
+        ) : activePanel === "qr" ? (
+          <QrPanel />
         ) : (
           <p className="rounded-lg bg-panel-muted p-3 text-sm leading-relaxed text-ink-500">
             {summary}

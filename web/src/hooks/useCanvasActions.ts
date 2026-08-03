@@ -17,6 +17,9 @@ import {
   setIconStrokeWidth,
 } from "@/lib/canvas/elements/icon";
 import { createImageElement } from "@/lib/canvas/elements/image";
+import { createQrElement, updateQrElement } from "@/lib/canvas/elements/qr";
+import type { QrConfig } from "@/lib/qr/config";
+import type { FabricObject } from "fabric";
 import {
   clearBackground,
   setGradientBackground,
@@ -95,6 +98,31 @@ export function useCanvasActions() {
       if (!element) return;
 
       addElement(canvas, element);
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  const addQr = useCallback(
+    async (config: QrConfig) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const element = await createQrElement(config);
+      if (!element) return;
+
+      addElement(canvas, element);
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  const updateQr = useCallback(
+    async (target: FabricObject, config: QrConfig) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      await updateQrElement(canvas, target, config);
       refresh();
     },
     [canvasRef, refresh],
@@ -211,6 +239,8 @@ export function useCanvasActions() {
     addShape,
     addIcon,
     addImage,
+    addQr,
+    updateQr,
     setBackground,
     setIconStyle,
     update,

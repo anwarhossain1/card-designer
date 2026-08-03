@@ -9,7 +9,7 @@ export type ElementObject = FabricObject & { meta?: ElementMeta };
  * Custom properties Fabric must keep when serializing a scene. Anything the
  * editor adds to an object has to be listed here or it is lost on save.
  */
-export const SERIALIZED_PROPERTIES = ["meta"];
+export const SERIALIZED_PROPERTIES = ["meta", "qr"];
 
 export interface CreateMetaOptions {
   kind: ElementKind;

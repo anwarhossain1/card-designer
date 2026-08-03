@@ -12,6 +12,7 @@ import { TextProperties } from "./TextProperties";
 import { ShapeProperties } from "./ShapeProperties";
 import { IconProperties } from "./IconProperties";
 import { ImageProperties } from "./ImageProperties";
+import { QrProperties } from "./QrProperties";
 import { ArrangeProperties } from "./ArrangeProperties";
 
 /**
@@ -88,6 +89,10 @@ export function PropertiesPanel() {
             {meta?.kind === "shape" ? <ShapeProperties target={target} /> : null}
             {meta?.kind === "icon" ? <IconProperties target={target} /> : null}
             {meta?.kind === "image" ? <ImageProperties target={target} /> : null}
+            {meta?.kind === "qr" ? (
+              /* Keyed so switching between codes resets the edit draft. */
+              <QrProperties key={meta.id} target={target} />
+            ) : null}
             <ArrangeProperties target={target} />
           </>
         ) : null}
