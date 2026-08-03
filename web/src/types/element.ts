@@ -12,7 +12,9 @@ export type ElementKind =
   | "image"
   | "icon"
   | "qr"
-  | "group";
+  | "group"
+  /** The card's backdrop: always bottom-most, managed by the background panel. */
+  | "background";
 
 /** Semantic slot a template element fills, used to prefill/replace content. */
 export type FieldRole =

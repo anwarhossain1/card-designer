@@ -21,16 +21,19 @@ export function getLayers(canvas: Canvas): LayerItem[] {
     .getObjects()
     .map((object, index) => {
       const meta = getMeta(object);
-      if (!meta) return null;
+      // The backdrop is managed by the background panel, not the layer list.
+      if (!meta || meta.kind === "background") return null;
 
-      return {
+      const item: LayerItem = {
         id: meta.id,
         name: meta.name,
         kind: meta.kind,
         locked: meta.locked,
         visible: object.visible !== false,
         index,
-      } satisfies LayerItem;
+      };
+
+      return item;
     })
     .filter((layer): layer is LayerItem => layer !== null)
     .reverse();

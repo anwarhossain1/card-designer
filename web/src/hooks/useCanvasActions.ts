@@ -16,9 +16,26 @@ import {
   setIconColor,
   setIconStrokeWidth,
 } from "@/lib/canvas/elements/icon";
+import { createImageElement } from "@/lib/canvas/elements/image";
+import {
+  clearBackground,
+  setGradientBackground,
+  setImageBackground,
+  setPatternBackground,
+  setSolidBackground,
+} from "@/lib/canvas/elements/background";
 import { loadFont } from "@/lib/fonts/loader";
 import { DEFAULT_FONT_FAMILY } from "@/config/fonts";
+import type { UploadedAsset } from "@/lib/uploads/readFile";
+import type { PatternId } from "@/lib/canvas/patterns";
 import type { ShapeVariant, TextVariant } from "@/types/element";
+
+export type BackgroundRequest =
+  | { kind: "none" }
+  | { kind: "solid"; color: string }
+  | { kind: "gradient"; from: string; to: string; angle: number }
+  | { kind: "image"; dataUrl: string }
+  | { kind: "pattern"; id: PatternId; background: string; foreground: string };
 
 /**
  * Element operations bound to the live canvas. Components call these instead of
@@ -64,6 +81,49 @@ export function useCanvasActions() {
       if (!element) return;
 
       addElement(canvas, element);
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  const addImage = useCallback(
+    async (asset: UploadedAsset) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const element = await createImageElement(asset);
+      if (!element) return;
+
+      addElement(canvas, element);
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  const setBackground = useCallback(
+    async (request: BackgroundRequest) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      switch (request.kind) {
+        case "none":
+          clearBackground(canvas);
+          canvas.requestRenderAll();
+          break;
+        case "solid":
+          setSolidBackground(canvas, request.color);
+          break;
+        case "gradient":
+          setGradientBackground(canvas, request);
+          break;
+        case "pattern":
+          setPatternBackground(canvas, request);
+          break;
+        case "image":
+          await setImageBackground(canvas, request.dataUrl);
+          break;
+      }
+
       refresh();
     },
     [canvasRef, refresh],
@@ -150,6 +210,8 @@ export function useCanvasActions() {
     addText,
     addShape,
     addIcon,
+    addImage,
+    setBackground,
     setIconStyle,
     update,
     updateFontFamily,

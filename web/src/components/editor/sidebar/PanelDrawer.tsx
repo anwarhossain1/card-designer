@@ -8,6 +8,8 @@ import { TextPanel } from "./panels/TextPanel";
 import { ShapesPanel } from "./panels/ShapesPanel";
 import { IconsPanel } from "./panels/IconsPanel";
 import { LayersPanel } from "./panels/LayersPanel";
+import { UploadsPanel } from "./panels/UploadsPanel";
+import { BackgroundPanel } from "./panels/BackgroundPanel";
 
 /**
  * Drawer beside the rail. Panels are registered here as their features land;
@@ -48,6 +50,10 @@ export function PanelDrawer() {
           <IconsPanel />
         ) : activePanel === "layers" ? (
           <LayersPanel />
+        ) : activePanel === "uploads" ? (
+          <UploadsPanel />
+        ) : activePanel === "background" ? (
+          <BackgroundPanel />
         ) : (
           <p className="rounded-lg bg-panel-muted p-3 text-sm leading-relaxed text-ink-500">
             {summary}

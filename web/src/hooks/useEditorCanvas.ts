@@ -125,6 +125,13 @@ export function useEditorCanvas() {
       canvas = createArtworkCanvas(element, size);
       canvasRef.current = canvas;
 
+      // Development-only handle for debugging from the console. Next.js strips
+      // this branch from production builds.
+      if (process.env.NODE_ENV !== "production") {
+        (window as unknown as { cardcraftCanvas?: Canvas }).cardcraftCanvas =
+          canvas;
+      }
+
       canvas.on("after:render", draw);
       syncLayers(size);
       setZoomState(fitCanvasToScreen(canvas, size));

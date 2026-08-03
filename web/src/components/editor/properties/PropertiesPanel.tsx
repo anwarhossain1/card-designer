@@ -11,6 +11,7 @@ import { getMeta } from "@/lib/canvas/meta";
 import { TextProperties } from "./TextProperties";
 import { ShapeProperties } from "./ShapeProperties";
 import { IconProperties } from "./IconProperties";
+import { ImageProperties } from "./ImageProperties";
 import { ArrangeProperties } from "./ArrangeProperties";
 
 /**
@@ -86,6 +87,7 @@ export function PropertiesPanel() {
             ) : null}
             {meta?.kind === "shape" ? <ShapeProperties target={target} /> : null}
             {meta?.kind === "icon" ? <IconProperties target={target} /> : null}
+            {meta?.kind === "image" ? <ImageProperties target={target} /> : null}
             <ArrangeProperties target={target} />
           </>
         ) : null}

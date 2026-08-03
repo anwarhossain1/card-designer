@@ -28,6 +28,7 @@ const KIND_ICON: Record<ElementKind, LucideIcon> = {
   image: ImageIcon,
   qr: QrCode,
   group: Shapes,
+  background: ImageIcon,
 };
 
 export interface LayerRowProps {
