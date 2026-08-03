@@ -11,9 +11,10 @@ export interface IconButtonProps
   active?: boolean;
 }
 
+/** Touch pointers get platform-minimum targets; mice keep the compact sizes. */
 const SIZES: Record<Size, string> = {
-  sm: "h-7 w-7",
-  md: "h-9 w-9",
+  sm: "h-7 w-7 coarse:h-10 coarse:w-10",
+  md: "h-9 w-9 coarse:h-11 coarse:w-11",
 };
 
 export const IconButton = forwardRef<HTMLButtonElement, IconButtonProps>(

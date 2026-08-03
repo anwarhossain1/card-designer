@@ -8,6 +8,7 @@ import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { useLayers } from "@/hooks/useLayers";
 import { useT } from "@/components/i18n/I18nProvider";
+import { cn } from "@/lib/utils/cn";
 import { getMeta } from "@/lib/canvas/meta";
 import { TextProperties } from "./TextProperties";
 import { ShapeProperties } from "./ShapeProperties";
@@ -17,10 +18,13 @@ import { QrProperties } from "./QrProperties";
 import { ArrangeProperties } from "./ArrangeProperties";
 
 /**
- * Right sidebar. Shows the selected element's properties; with nothing selected
- * it explains what to do, the way Canva does.
+ * Selected element's properties.
+ *
+ * The desktop right sidebar and the mobile bottom sheet render the same body;
+ * `embedded` drops the sidebar chrome (fixed width, border, header) because the
+ * sheet supplies its own title and the element actions live in the tool bar.
  */
-export function PropertiesPanel() {
+export function PropertiesPanel({ embedded = false }: { embedded?: boolean }) {
   const t = useT().editor;
   const { selected } = useCanvas();
   const { remove, duplicate } = useCanvasActions();
@@ -34,9 +38,17 @@ export function PropertiesPanel() {
     <aside
       aria-label={t.properties.title}
       data-properties
-      className="flex w-72 shrink-0 flex-col border-l border-hairline bg-panel"
+      className={cn(
+        "flex flex-col bg-panel",
+        embedded ? "w-full" : "w-72 shrink-0 border-l border-hairline",
+      )}
     >
-      <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hairline px-3">
+      <div
+        className={cn(
+          "flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hairline px-3",
+          embedded && "hidden",
+        )}
+      >
         <h2 className="truncate text-sm font-semibold text-ink-800">
           {selected.length === 0
             ? t.properties.title

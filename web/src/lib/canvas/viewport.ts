@@ -7,16 +7,22 @@ export interface Size {
   height: number;
 }
 
-/** Space kept between the card and the workspace edges when fitting. */
-const FIT_PADDING = 56;
+/**
+ * Space kept between the card and the workspace edges when fitting. A fixed
+ * 56px would eat nearly a third of a 390px phone, so it scales down with the
+ * viewport.
+ */
+const fitPadding = (container: Size) =>
+  Math.min(56, Math.round(Math.min(container.width, container.height) * 0.07));
 
 export const clampZoom = (zoom: number) => clamp(zoom, ZOOM.min, ZOOM.max);
 
 /** Largest zoom that keeps the whole card (plus padding) visible. */
 export function getFitZoom(container: Size): number {
+  const padding = fitPadding(container);
   const available = {
-    width: Math.max(container.width - FIT_PADDING * 2, 40),
-    height: Math.max(container.height - FIT_PADDING * 2, 40),
+    width: Math.max(container.width - padding * 2, 40),
+    height: Math.max(container.height - padding * 2, 40),
   };
 
   return clampZoom(

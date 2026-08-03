@@ -4,7 +4,7 @@ import { useEffect, useState, type ReactNode } from "react";
 import { cn } from "@/lib/utils/cn";
 
 const CONTROL =
-  "h-8 rounded-md border border-hairline bg-panel px-2 text-xs text-ink-800 outline-none transition-colors focus:border-brand-400 focus-visible:ring-2 focus-visible:ring-brand-100";
+  "h-8 coarse:h-11 rounded-md border border-hairline bg-panel px-2 text-xs text-ink-800 outline-none transition-colors focus:border-brand-400 focus-visible:ring-2 focus-visible:ring-brand-100";
 
 /** Numeric input that commits on blur/Enter so typing never fights the canvas. */
 export function NumberInput({
@@ -98,7 +98,7 @@ export function ColorInput({
 }) {
   return (
     <label className="flex items-center gap-2">
-      <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md border border-hairline">
+      <span className="relative h-7 w-7 shrink-0 overflow-hidden rounded-md border border-hairline coarse:h-10 coarse:w-10">
         <input
           type="color"
           value={normalizeHex(value)}
@@ -169,7 +169,7 @@ export function SegmentedControl<T extends string>({
           aria-pressed={value === option.value}
           onClick={() => onChange(option.value)}
           className={cn(
-            "grid h-7 flex-1 place-items-center rounded-[5px] text-ink-600 transition-colors",
+            "grid h-7 flex-1 place-items-center rounded-[5px] text-ink-600 transition-colors coarse:h-10",
             "hover:bg-ink-100 focus-visible:outline-2 focus-visible:outline-brand-400",
             value === option.value && "bg-panel text-brand-700 shadow-sm",
           )}

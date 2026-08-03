@@ -5,25 +5,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { useUiStore } from "@/store/uiStore";
 import { useT } from "@/components/i18n/I18nProvider";
 import { PANEL_MAP } from "./panelConfig";
-import { TextPanel } from "./panels/TextPanel";
-import { ShapesPanel } from "./panels/ShapesPanel";
-import { IconsPanel } from "./panels/IconsPanel";
-import { LayersPanel } from "./panels/LayersPanel";
-import { UploadsPanel } from "./panels/UploadsPanel";
-import { BackgroundPanel } from "./panels/BackgroundPanel";
-import { QrPanel } from "./panels/QrPanel";
-import { TemplatesPanel } from "./panels/TemplatesPanel";
-
-const PANEL_CONTENT = {
-  templates: TemplatesPanel,
-  uploads: UploadsPanel,
-  text: TextPanel,
-  shapes: ShapesPanel,
-  icons: IconsPanel,
-  background: BackgroundPanel,
-  qr: QrPanel,
-  layers: LayersPanel,
-} as const;
+import { PANEL_CONTENT } from "./panelContent";
 
 /** Drawer beside the rail; each tool renders its own panel body. */
 export function PanelDrawer() {

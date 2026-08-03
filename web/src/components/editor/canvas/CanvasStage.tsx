@@ -14,7 +14,7 @@ import { ZoomBar } from "./ZoomBar";
  *   1 — Fabric artwork canvas (the only layer that is ever exported)
  *   2 — guide overlay (bleed, trim, safe area, grid)
  */
-export function CanvasStage() {
+export function CanvasStage({ isCompact = false }: { isCompact?: boolean }) {
   const t = useT().editor.canvas;
   const { containerRef, canvasElRef, underlayRef, overlayRef, isReady } =
     useCanvas();
@@ -78,7 +78,8 @@ export function CanvasStage() {
         ) : null}
       </div>
 
-      <ZoomBar />
+      {/* Compact layouts use the floating zoom pill instead of a full bar. */}
+      {isCompact ? null : <ZoomBar />}
     </div>
   );
 }

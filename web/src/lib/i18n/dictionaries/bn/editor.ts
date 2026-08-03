@@ -211,9 +211,16 @@ export const editor: Dictionary["editor"] = {
     action: (format: string) => `${format} ডাউনলোড করুন`,
     failed: "এক্সপোর্ট ব্যর্থ হয়েছে — আবার চেষ্টা করুন।",
   },
-  mobile: {
-    title: "এডিটরের জন্য আরও বড় স্ক্রিন দরকার",
-    body: "ভিজিটিং কার্ড নিখুঁত কাজ — ক্যানভাস, লেয়ার তালিকা আর বৈশিষ্ট্যের নিয়ন্ত্রণের জন্য ডেস্কটপ বা আড়াআড়ি ট্যাবলেট দরকার। ডিজাইন শুরু করতে বড় স্ক্রিনে CardCraft খুলুন।",
-    back: "হোমে ফিরে যান",
+  mobileUi: {
+    more: "আরও",
+    view: "ভিউ",
+    theme: "থিম",
+    language: "ভাষা",
+    closeSheet: "বন্ধ করুন",
+    editProperties: "এডিট",
+    themeLight: "উজ্জ্বল",
+    themeDark: "অন্ধকার",
+    themeSystem: "সিস্টেম",
+    rotateHint: "আরও জায়গা পেতে ফোনটি আড়াআড়ি ঘোরান।",
   },
 };

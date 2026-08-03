@@ -202,9 +202,16 @@ export const editor = {
     action: (format: string) => `Download ${format}`,
     failed: "Export failed — try again.",
   },
-  mobile: {
-    title: "The editor needs a bigger screen",
-    body: "Business cards are precise work — the canvas, layer list and property controls need a desktop or tablet in landscape. Open CardCraft on a larger screen to start designing.",
-    back: "Back to home",
+  mobileUi: {
+    more: "More",
+    view: "View",
+    theme: "Theme",
+    language: "Language",
+    closeSheet: "Close",
+    editProperties: "Edit",
+    themeLight: "Light",
+    themeDark: "Dark",
+    themeSystem: "System",
+    rotateHint: "Turn your phone sideways for more room.",
   },
 };

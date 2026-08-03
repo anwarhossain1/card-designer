@@ -1,6 +1,13 @@
 @import "tailwindcss";
 
 /*
+ * Touch-input variant. Keyed on the pointer, not the viewport: a small window
+ * on a desktop still has a mouse and does not need 44px controls, while a
+ * large tablet does.
+ */
+@custom-variant coarse (@media (pointer: coarse));
+
+/*
  * Design tokens. Everything visual should reference these, never raw hex.
  * The editor chrome is intentionally neutral so user artwork stays the focus.
  */
@@ -126,6 +133,18 @@
 
   ::selection {
     background-color: var(--color-brand-200);
+  }
+
+  /*
+   * Sliders are a 4px-tall track, which is an impossible touch target. Padding
+   * grows the hit area to 24px while `background-clip` keeps the visible track
+   * thin — no wrapper element, no restyled thumb.
+   */
+  @media (pointer: coarse) {
+    input[type="range"] {
+      padding-block: 10px;
+      background-clip: content-box;
+    }
   }
 }
 

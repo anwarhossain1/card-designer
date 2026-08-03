@@ -72,10 +72,25 @@ export function useEditorCanvas() {
 
   /* ---------------------------------------------------------------- actions */
 
+  /**
+   * Measures the container now rather than trusting the cached size: a fit
+   * requested in the same commit as a layout change would otherwise run before
+   * the resize observer reports the new box, and fit the card to the old one.
+   */
   const fitToScreen = useCallback(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
-    setZoomState(fitCanvasToScreen(canvas, sizeRef.current));
+    const container = containerRef.current;
+    if (!canvas || !container) return;
+
+    const size = {
+      width: container.clientWidth,
+      height: container.clientHeight,
+    };
+    if (size.width === 0 || size.height === 0) return;
+
+    sizeRef.current = size;
+    canvas.setDimensions(size);
+    setZoomState(fitCanvasToScreen(canvas, size));
   }, []);
 
   const setZoom = useCallback((value: number, focus?: Point) => {
