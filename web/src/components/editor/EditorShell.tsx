@@ -1,6 +1,7 @@
 "use client";
 
 import { useIsSmallScreen } from "@/hooks/useMediaQuery";
+import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { CanvasProvider } from "./canvas/CanvasProvider";
 import { CanvasStage } from "./canvas/CanvasStage";
 import { MobileNotice } from "./MobileNotice";
@@ -20,17 +21,26 @@ export function EditorShell() {
   if (isSmallScreen) return <MobileNotice />;
 
   return (
+    <CanvasProvider>
+      <EditorLayout />
+    </CanvasProvider>
+  );
+}
+
+/** Inside the provider so the chrome and shortcuts can reach the canvas. */
+function EditorLayout() {
+  useKeyboardShortcuts();
+
+  return (
     <div data-editor-root className="flex h-screen flex-col overflow-hidden">
       <Toolbar />
 
-      <CanvasProvider>
-        <div className="flex min-h-0 flex-1">
-          <SidebarRail />
-          <PanelDrawer />
-          <CanvasStage />
-          <PropertiesPanel />
-        </div>
-      </CanvasProvider>
+      <div className="flex min-h-0 flex-1">
+        <SidebarRail />
+        <PanelDrawer />
+        <CanvasStage />
+        <PropertiesPanel />
+      </div>
     </div>
   );
 }

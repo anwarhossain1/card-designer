@@ -1,35 +1,73 @@
 "use client";
 
-import { MousePointerSquareDashed } from "lucide-react";
-import { useEditorStore } from "@/store/editorStore";
+import { CopyPlus, MousePointerSquareDashed, Trash2 } from "lucide-react";
+import type { Textbox } from "fabric";
+import { IconButton } from "@/components/ui/IconButton";
+import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
+import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { getMeta } from "@/lib/canvas/meta";
+import { TextProperties } from "./TextProperties";
 
 /**
- * Right sidebar. Renders the selected element's properties; with nothing
- * selected it explains what to do, the way Canva does.
+ * Right sidebar. Shows the selected element's properties; with nothing selected
+ * it explains what to do, the way Canva does.
  */
 export function PropertiesPanel() {
-  const selection = useEditorStore((state) => state.selection);
+  const { selected } = useCanvas();
+  const { remove, duplicate } = useCanvasActions();
+
+  const target = selected[0];
+  const meta = getMeta(target);
+  const isMultiple = selected.length > 1;
 
   return (
     <aside
       aria-label="Properties"
       className="flex w-72 shrink-0 flex-col border-l border-hairline bg-panel"
     >
-      <div className="flex h-12 shrink-0 items-center border-b border-hairline px-3">
-        <h2 className="text-sm font-semibold text-ink-800">Properties</h2>
+      <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hairline px-3">
+        <h2 className="truncate text-sm font-semibold text-ink-800">
+          {selected.length === 0
+            ? "Properties"
+            : isMultiple
+              ? `${selected.length} elements`
+              : (meta?.name ?? "Element")}
+        </h2>
+
+        {selected.length > 0 ? (
+          <div className="flex items-center gap-0.5">
+            <IconButton
+              size="sm"
+              label="Duplicate (Ctrl+D)"
+              onClick={() => void duplicate()}
+            >
+              <CopyPlus className="h-4 w-4" />
+            </IconButton>
+            <IconButton size="sm" label="Delete (Del)" onClick={remove}>
+              <Trash2 className="h-4 w-4" />
+            </IconButton>
+          </div>
+        ) : null}
       </div>
 
-      <div className="scrollbar-thin flex-1 overflow-y-auto p-3">
-        {selection.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 rounded-lg bg-panel-muted px-4 py-10 text-center">
+      <div className="scrollbar-thin flex-1 overflow-y-auto">
+        {selected.length === 0 ? (
+          <div className="m-3 flex flex-col items-center gap-3 rounded-lg bg-panel-muted px-4 py-10 text-center">
             <MousePointerSquareDashed className="h-6 w-6 text-ink-300" />
             <p className="text-sm text-ink-500">
               Select something on the card to edit its properties.
             </p>
           </div>
+        ) : isMultiple ? (
+          <p className="p-3 text-sm text-ink-500">
+            Editing several elements at once is limited to duplicate and delete
+            for now.
+          </p>
+        ) : meta?.kind === "text" && target ? (
+          <TextProperties target={target as Textbox} />
         ) : (
-          <p className="text-sm text-ink-500">
-            {selection.length} element{selection.length > 1 ? "s" : ""} selected.
+          <p className="p-3 text-sm text-ink-500">
+            Properties for this element type arrive with its own feature.
           </p>
         )}
       </div>

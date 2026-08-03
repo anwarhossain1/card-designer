@@ -4,10 +4,11 @@ import { X } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { useUiStore } from "@/store/uiStore";
 import { PANEL_MAP } from "./panelConfig";
+import { TextPanel } from "./panels/TextPanel";
 
 /**
- * Drawer beside the rail. Each panel's real content arrives with its own
- * feature; until then the drawer states what will live here.
+ * Drawer beside the rail. Panels are registered here as their features land;
+ * the rest state what will live in them.
  */
 export function PanelDrawer() {
   const activePanel = useUiStore((state) => state.activePanel);
@@ -36,9 +37,13 @@ export function PanelDrawer() {
       </div>
 
       <div className="scrollbar-thin flex-1 overflow-y-auto p-3">
-        <p className="rounded-lg bg-panel-muted p-3 text-sm leading-relaxed text-ink-500">
-          {summary}
-        </p>
+        {activePanel === "text" ? (
+          <TextPanel />
+        ) : (
+          <p className="rounded-lg bg-panel-muted p-3 text-sm leading-relaxed text-ink-500">
+            {summary}
+          </p>
+        )}
       </div>
     </aside>
   );

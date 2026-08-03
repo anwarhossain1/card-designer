@@ -29,6 +29,8 @@ export function useEditorCanvas() {
   const overlayRef = useRef<HTMLCanvasElement>(null);
 
   const canvasRef = useRef<Canvas | null>(null);
+  /** Resolves once the previous canvas instance has fully torn down. */
+  const teardownRef = useRef<Promise<unknown>>(Promise.resolve());
   const underlayCtx = useRef<CanvasRenderingContext2D | null>(null);
   const overlayCtx = useRef<CanvasRenderingContext2D | null>(null);
   const sizeRef = useRef({ width: 0, height: 0 });
@@ -100,41 +102,62 @@ export function useEditorCanvas() {
     const element = canvasElRef.current;
     if (!container || !element) return;
 
-    const size = {
-      width: container.clientWidth,
-      height: container.clientHeight,
-    };
-    sizeRef.current = size;
+    let canvas: Canvas | null = null;
+    let observer: ResizeObserver | null = null;
+    let cancelled = false;
 
-    const canvas = createArtworkCanvas(element, size);
-    canvasRef.current = canvas;
+    const mount = async () => {
+      /*
+       * Fabric's dispose() finishes on the next animation frame. Re-initialising
+       * the same element before that lands leaves a canvas that holds objects
+       * but paints nothing — so always wait for the previous teardown. Strict
+       * Mode's double-mount and client-side navigation both hit this path.
+       */
+      await teardownRef.current;
+      if (cancelled) return;
 
-    canvas.on("after:render", draw);
-    syncLayers(size);
-    setZoomState(fitCanvasToScreen(canvas, size));
-    setIsReady(true);
-
-    const observer = new ResizeObserver(([entry]) => {
-      if (!entry) return;
-      const next = {
-        width: entry.contentRect.width,
-        height: entry.contentRect.height,
+      const size = {
+        width: container.clientWidth,
+        height: container.clientHeight,
       };
-      if (next.width === 0 || next.height === 0) return;
+      sizeRef.current = size;
 
-      preserveCenterOnResize(canvas, sizeRef.current, next);
-      sizeRef.current = next;
-      canvas.setDimensions(next);
-      syncLayers(next);
-    });
-    observer.observe(container);
+      canvas = createArtworkCanvas(element, size);
+      canvasRef.current = canvas;
+
+      canvas.on("after:render", draw);
+      syncLayers(size);
+      setZoomState(fitCanvasToScreen(canvas, size));
+      setIsReady(true);
+
+      observer = new ResizeObserver(([entry]) => {
+        if (!entry || !canvas) return;
+        const next = {
+          width: entry.contentRect.width,
+          height: entry.contentRect.height,
+        };
+        if (next.width === 0 || next.height === 0) return;
+
+        preserveCenterOnResize(canvas, sizeRef.current, next);
+        sizeRef.current = next;
+        canvas.setDimensions(next);
+        syncLayers(next);
+      });
+      observer.observe(container);
+    };
+
+    void mount();
 
     return () => {
-      observer.disconnect();
-      canvas.off("after:render", draw);
+      cancelled = true;
+      observer?.disconnect();
       canvasRef.current = null;
       setIsReady(false);
-      void canvas.dispose();
+
+      if (canvas) {
+        canvas.off("after:render", draw);
+        teardownRef.current = canvas.dispose().catch(() => undefined);
+      }
     };
   }, [draw, syncLayers]);
 

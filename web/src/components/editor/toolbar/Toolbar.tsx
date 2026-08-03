@@ -14,15 +14,21 @@ import {
 import { IconButton } from "@/components/ui/IconButton";
 import { Button } from "@/components/ui/Button";
 import { useEditorStore } from "@/store/editorStore";
+import { useCanvas } from "../canvas/CanvasProvider";
+import { useCanvasActions } from "@/hooks/useCanvasActions";
 
 /**
- * Top bar. The edit actions are wired to the history/clipboard features that
- * land next; they render disabled until then rather than silently doing
+ * Top bar. Undo/redo and clipboard render disabled until the history feature
+ * lands — better an honest disabled control than one that silently does
  * nothing.
  */
 export function Toolbar() {
   const documentName = useEditorStore((state) => state.documentName);
   const setDocumentName = useEditorStore((state) => state.setDocumentName);
+  const { selected } = useCanvas();
+  const { remove, duplicate } = useCanvasActions();
+
+  const hasSelection = selected.length > 0;
 
   return (
     <header className="flex h-14 shrink-0 items-center justify-between gap-3 border-b border-hairline bg-panel px-3">
@@ -66,10 +72,18 @@ export function Toolbar() {
         <IconButton label="Paste (Ctrl+V)" disabled>
           <ClipboardPaste className="h-4 w-4" />
         </IconButton>
-        <IconButton label="Duplicate (Ctrl+D)" disabled>
+        <IconButton
+          label="Duplicate (Ctrl+D)"
+          disabled={!hasSelection}
+          onClick={() => void duplicate()}
+        >
           <CopyPlus className="h-4 w-4" />
         </IconButton>
-        <IconButton label="Delete (Del)" disabled>
+        <IconButton
+          label="Delete (Del)"
+          disabled={!hasSelection}
+          onClick={remove}
+        >
           <Trash2 className="h-4 w-4" />
         </IconButton>
       </div>
