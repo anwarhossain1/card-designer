@@ -2,7 +2,9 @@
 
 import Link from "next/link";
 import {
+  Check,
   ChevronLeft,
+  CloudUpload,
   Copy,
   ClipboardPaste,
   CopyPlus,
@@ -21,6 +23,8 @@ import { useCanvasActions } from "@/hooks/useCanvasActions";
 export function Toolbar() {
   const documentName = useEditorStore((state) => state.documentName);
   const setDocumentName = useEditorStore((state) => state.setDocumentName);
+  const isDirty = useEditorStore((state) => state.isDirty);
+  const lastSavedAt = useEditorStore((state) => state.lastSavedAt);
   const { selected, undo, redo, canUndo, canRedo, copy, paste, hasClipboard } =
     useCanvas();
   const { remove, duplicate } = useCanvasActions();
@@ -51,6 +55,25 @@ export function Toolbar() {
           spellCheck={false}
           className="h-9 w-52 truncate rounded-md border border-transparent px-2 text-sm font-medium text-ink-800 outline-none transition-colors hover:border-hairline focus:border-brand-400 focus:bg-panel"
         />
+
+        {isDirty || lastSavedAt ? (
+          <span
+            role="status"
+            className="hidden shrink-0 items-center gap-1 text-xs text-ink-400 lg:flex"
+          >
+            {isDirty ? (
+              <>
+                <CloudUpload className="h-3.5 w-3.5 animate-pulse" />
+                Saving…
+              </>
+            ) : (
+              <>
+                <Check className="h-3.5 w-3.5" />
+                Saved
+              </>
+            )}
+          </span>
+        ) : null}
       </div>
 
       <div className="flex items-center gap-0.5">

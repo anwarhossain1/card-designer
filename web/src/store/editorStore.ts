@@ -19,6 +19,13 @@ interface EditorState {
   setSelection: (ids: string[]) => void;
   markDirty: () => void;
   markSaved: (at?: string) => void;
+  /** Adopts a stored document's identity after its scene has been loaded. */
+  hydrate: (doc: {
+    documentId: string;
+    documentName: string;
+    templateId: string | null;
+    lastSavedAt: string | null;
+  }) => void;
   reset: () => void;
 }
 
@@ -40,5 +47,6 @@ export const useEditorStore = create<EditorState>((set) => ({
   markDirty: () => set({ isDirty: true }),
   markSaved: (at) =>
     set({ lastSavedAt: at ?? new Date().toISOString(), isDirty: false }),
+  hydrate: (doc) => set({ ...doc, isDirty: false }),
   reset: () => set(initial()),
 }));

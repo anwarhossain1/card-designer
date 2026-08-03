@@ -8,11 +8,16 @@ import {
 } from "@/hooks/useCanvasSelection";
 import { useHistory, type HistoryState } from "@/hooks/useHistory";
 import { useClipboard, type ClipboardState } from "@/hooks/useClipboard";
+import {
+  useDocumentPersistence,
+  type PersistenceState,
+} from "@/hooks/useDocumentPersistence";
 
 type CanvasContextValue = EditorCanvasApi &
   SelectionState &
   HistoryState &
-  ClipboardState;
+  ClipboardState &
+  PersistenceState;
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
 
@@ -24,12 +29,18 @@ const CanvasContext = createContext<CanvasContextValue | null>(null);
 export function CanvasProvider({ children }: { children: ReactNode }) {
   const canvas = useEditorCanvas();
   const selection = useCanvasSelection(canvas.canvasRef, canvas.isReady);
-  const history = useHistory(canvas.canvasRef, canvas.isReady, selection.refresh);
+  const persistence = useDocumentPersistence(canvas.canvasRef, canvas.isReady);
+  // History waits for hydration so the undo baseline is the restored design.
+  const history = useHistory(
+    canvas.canvasRef,
+    canvas.isReady && persistence.isHydrated,
+    selection.refresh,
+  );
   const clipboard = useClipboard(canvas.canvasRef, selection.refresh);
 
   const value = useMemo(
-    () => ({ ...canvas, ...selection, ...history, ...clipboard }),
-    [canvas, selection, history, clipboard],
+    () => ({ ...canvas, ...selection, ...persistence, ...history, ...clipboard }),
+    [canvas, selection, persistence, history, clipboard],
   );
 
   return (
