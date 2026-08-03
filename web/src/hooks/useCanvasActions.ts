@@ -163,12 +163,14 @@ export function useCanvasActions() {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      canvas.getActiveObjects().forEach((object) => {
+      const targets = canvas.getActiveObjects();
+      targets.forEach((object) => {
         if (color) setIconColor(object, color);
         if (strokeWidth !== undefined) setIconStrokeWidth(object, strokeWidth);
       });
 
       canvas.requestRenderAll();
+      if (targets[0]) canvas.fire("object:modified", { target: targets[0] });
       refresh();
     },
     [canvasRef, refresh],

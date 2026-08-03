@@ -50,13 +50,18 @@ export function createArtworkCanvas(
     stopContextMenu: true,
   });
 
-  canvas.clipPath = new Rect({
+  canvas.clipPath = createCardClipPath();
+
+  return canvas;
+}
+
+/** The card-shaped clip applied to artwork; recreated after history restores. */
+export function createCardClipPath(): Rect {
+  return new Rect({
     left: 0,
     top: 0,
     width: CANVAS_WIDTH,
     height: CANVAS_HEIGHT,
     absolutePositioned: true,
   });
-
-  return canvas;
 }

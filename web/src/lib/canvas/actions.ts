@@ -96,4 +96,6 @@ export function updateSelected(
   });
 
   canvas.requestRenderAll();
+  // Property edits do not fire Fabric events on their own; history needs one.
+  canvas.fire("object:modified", { target: targets[0] });
 }

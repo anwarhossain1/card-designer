@@ -17,15 +17,12 @@ import { useEditorStore } from "@/store/editorStore";
 import { useCanvas } from "../canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 
-/**
- * Top bar. Undo/redo and clipboard render disabled until the history feature
- * lands — better an honest disabled control than one that silently does
- * nothing.
- */
+/** Top bar. Download stays disabled until the export feature lands. */
 export function Toolbar() {
   const documentName = useEditorStore((state) => state.documentName);
   const setDocumentName = useEditorStore((state) => state.setDocumentName);
-  const { selected } = useCanvas();
+  const { selected, undo, redo, canUndo, canRedo, copy, paste, hasClipboard } =
+    useCanvas();
   const { remove, duplicate } = useCanvasActions();
 
   const hasSelection = selected.length > 0;
@@ -57,19 +54,35 @@ export function Toolbar() {
       </div>
 
       <div className="flex items-center gap-0.5">
-        <IconButton label="Undo (Ctrl+Z)" disabled>
+        <IconButton
+          label="Undo (Ctrl+Z)"
+          disabled={!canUndo}
+          onClick={() => void undo()}
+        >
           <Undo2 className="h-4 w-4" />
         </IconButton>
-        <IconButton label="Redo (Ctrl+Y)" disabled>
+        <IconButton
+          label="Redo (Ctrl+Y)"
+          disabled={!canRedo}
+          onClick={() => void redo()}
+        >
           <Redo2 className="h-4 w-4" />
         </IconButton>
 
         <span aria-hidden className="mx-1.5 h-5 w-px bg-hairline" />
 
-        <IconButton label="Copy (Ctrl+C)" disabled>
+        <IconButton
+          label="Copy (Ctrl+C)"
+          disabled={!hasSelection}
+          onClick={() => void copy()}
+        >
           <Copy className="h-4 w-4" />
         </IconButton>
-        <IconButton label="Paste (Ctrl+V)" disabled>
+        <IconButton
+          label="Paste (Ctrl+V)"
+          disabled={!hasClipboard}
+          onClick={() => void paste()}
+        >
           <ClipboardPaste className="h-4 w-4" />
         </IconButton>
         <IconButton

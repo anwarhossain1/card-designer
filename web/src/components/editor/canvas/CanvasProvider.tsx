@@ -6,23 +6,30 @@ import {
   useCanvasSelection,
   type SelectionState,
 } from "@/hooks/useCanvasSelection";
+import { useHistory, type HistoryState } from "@/hooks/useHistory";
+import { useClipboard, type ClipboardState } from "@/hooks/useClipboard";
 
-type CanvasContextValue = EditorCanvasApi & SelectionState;
+type CanvasContextValue = EditorCanvasApi &
+  SelectionState &
+  HistoryState &
+  ClipboardState;
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
 
 /**
- * Owns the single canvas instance and its selection state. Toolbar, panels and
- * the properties sidebar reach the canvas through this context instead of prop
- * drilling.
+ * Owns the single canvas instance plus its selection, history and clipboard.
+ * Toolbar, panels and the properties sidebar reach the canvas through this
+ * context instead of prop drilling.
  */
 export function CanvasProvider({ children }: { children: ReactNode }) {
   const canvas = useEditorCanvas();
   const selection = useCanvasSelection(canvas.canvasRef, canvas.isReady);
+  const history = useHistory(canvas.canvasRef, canvas.isReady, selection.refresh);
+  const clipboard = useClipboard(canvas.canvasRef, selection.refresh);
 
   const value = useMemo(
-    () => ({ ...canvas, ...selection }),
-    [canvas, selection],
+    () => ({ ...canvas, ...selection, ...history, ...clipboard }),
+    [canvas, selection, history, clipboard],
   );
 
   return (

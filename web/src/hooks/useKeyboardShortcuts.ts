@@ -13,11 +13,11 @@ const isTypingTarget = (target: EventTarget | null) =>
     ["INPUT", "TEXTAREA", "SELECT"].includes(target.tagName));
 
 /**
- * Element-level shortcuts. Undo/redo and clipboard arrive with the history
- * feature; these are the ones the element system already supports.
+ * Editor shortcuts. Everything yields while a form field has focus or a text
+ * element is being edited in place, so typing always wins.
  */
 export function useKeyboardShortcuts() {
-  const { canvasRef } = useCanvas();
+  const { canvasRef, undo, redo, copy, cut, paste } = useCanvas();
   const { remove, duplicate, nudge, deselect } = useCanvasActions();
 
   useEffect(() => {
@@ -30,12 +30,46 @@ export function useKeyboardShortcuts() {
       if (active && "isEditing" in active && active.isEditing) return;
 
       const modifier = event.ctrlKey || event.metaKey;
+      const hasSelection = canvas.getActiveObjects().length > 0;
       const step = event.shiftKey ? NUDGE_LARGE : NUDGE;
+
+      if (modifier) {
+        switch (event.key.toLowerCase()) {
+          case "z":
+            event.preventDefault();
+            void (event.shiftKey ? redo() : undo());
+            return;
+          case "y":
+            event.preventDefault();
+            void redo();
+            return;
+          case "c":
+            if (!hasSelection) return;
+            event.preventDefault();
+            void copy();
+            return;
+          case "x":
+            if (!hasSelection) return;
+            event.preventDefault();
+            void cut();
+            return;
+          case "v":
+            event.preventDefault();
+            void paste();
+            return;
+          case "d":
+            event.preventDefault();
+            void duplicate();
+            return;
+          default:
+            return;
+        }
+      }
 
       switch (event.key) {
         case "Delete":
         case "Backspace":
-          if (canvas.getActiveObjects().length === 0) return;
+          if (!hasSelection) return;
           event.preventDefault();
           remove();
           return;
@@ -48,7 +82,7 @@ export function useKeyboardShortcuts() {
         case "ArrowRight":
         case "ArrowUp":
         case "ArrowDown": {
-          if (canvas.getActiveObjects().length === 0) return;
+          if (!hasSelection) return;
           event.preventDefault();
           const dx =
             event.key === "ArrowLeft" ? -step : event.key === "ArrowRight" ? step : 0;
@@ -57,16 +91,10 @@ export function useKeyboardShortcuts() {
           nudge(dx, dy);
           return;
         }
-
-        default:
-          if (modifier && event.key.toLowerCase() === "d") {
-            event.preventDefault();
-            void duplicate();
-          }
       }
     };
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [canvasRef, deselect, duplicate, nudge, remove]);
+  }, [canvasRef, copy, cut, deselect, duplicate, nudge, paste, redo, remove, undo]);
 }

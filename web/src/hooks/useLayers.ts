@@ -51,6 +51,8 @@ export function useLayers() {
 
       action(object);
       canvas.requestRenderAll();
+      // Lock/visibility changes have no native event; history listens for this.
+      canvas.fire("object:modified", { target: object });
       refresh();
     },
     [canvasRef, refresh],
@@ -107,6 +109,8 @@ export function useLayers() {
 
       reorderByListIndex(canvas, fromListIndex, toListIndex);
       canvas.requestRenderAll();
+      const [first] = canvas.getObjects();
+      if (first) canvas.fire("object:modified", { target: first });
       refresh();
     },
     [canvasRef, refresh],
