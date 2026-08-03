@@ -7,6 +7,7 @@ import { PANEL_MAP } from "./panelConfig";
 import { TextPanel } from "./panels/TextPanel";
 import { ShapesPanel } from "./panels/ShapesPanel";
 import { IconsPanel } from "./panels/IconsPanel";
+import { LayersPanel } from "./panels/LayersPanel";
 
 /**
  * Drawer beside the rail. Panels are registered here as their features land;
@@ -45,6 +46,8 @@ export function PanelDrawer() {
           <ShapesPanel />
         ) : activePanel === "icons" ? (
           <IconsPanel />
+        ) : activePanel === "layers" ? (
+          <LayersPanel />
         ) : (
           <p className="rounded-lg bg-panel-muted p-3 text-sm leading-relaxed text-ink-500">
             {summary}

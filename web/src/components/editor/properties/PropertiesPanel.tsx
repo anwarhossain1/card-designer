@@ -1,10 +1,12 @@
 "use client";
 
-import { CopyPlus, MousePointerSquareDashed, Trash2 } from "lucide-react";
+import { CopyPlus, Lock, MousePointerSquareDashed, Trash2 } from "lucide-react";
 import type { Textbox } from "fabric";
+import { Button } from "@/components/ui/Button";
 import { IconButton } from "@/components/ui/IconButton";
 import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useLayers } from "@/hooks/useLayers";
 import { getMeta } from "@/lib/canvas/meta";
 import { TextProperties } from "./TextProperties";
 import { ShapeProperties } from "./ShapeProperties";
@@ -18,6 +20,7 @@ import { ArrangeProperties } from "./ArrangeProperties";
 export function PropertiesPanel() {
   const { selected } = useCanvas();
   const { remove, duplicate } = useCanvasActions();
+  const { toggleLock } = useLayers();
 
   const target = selected[0];
   const meta = getMeta(target);
@@ -66,6 +69,16 @@ export function PropertiesPanel() {
             Editing several elements at once is limited to duplicate and delete
             for now.
           </p>
+        ) : meta?.locked ? (
+          <div className="m-3 space-y-3 rounded-lg bg-panel-muted px-4 py-6 text-center">
+            <Lock className="mx-auto h-5 w-5 text-ink-400" />
+            <p className="text-sm text-ink-500">
+              This element is locked. Unlock it to edit its properties.
+            </p>
+            <Button size="sm" variant="outline" onClick={() => toggleLock(meta.id)}>
+              Unlock
+            </Button>
+          </div>
         ) : target ? (
           <>
             {meta?.kind === "text" ? (
