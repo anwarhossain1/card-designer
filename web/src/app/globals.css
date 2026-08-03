@@ -1,0 +1,79 @@
+@import "tailwindcss";
+
+/*
+ * Design tokens. Everything visual should reference these, never raw hex.
+ * The editor chrome is intentionally neutral so user artwork stays the focus.
+ */
+@theme {
+  --color-brand-50: #f2f2ff;
+  --color-brand-100: #e6e4ff;
+  --color-brand-200: #cfcaff;
+  --color-brand-300: #ada4ff;
+  --color-brand-400: #8b78ff;
+  --color-brand-500: #6c4cff;
+  --color-brand-600: #5a30f5;
+  --color-brand-700: #4a21d8;
+  --color-brand-800: #3d1cae;
+  --color-brand-900: #331b8a;
+
+  --color-accent-400: #37d5f2;
+  --color-accent-500: #12b5da;
+
+  --color-ink-50: #f7f7f8;
+  --color-ink-100: #eceef1;
+  --color-ink-200: #dcdfe4;
+  --color-ink-300: #b9bec7;
+  --color-ink-400: #8b929e;
+  --color-ink-500: #6b7280;
+  --color-ink-600: #4b5563;
+  --color-ink-700: #374151;
+  --color-ink-800: #1f2430;
+  --color-ink-900: #11141c;
+
+  /* Editor chrome */
+  --color-panel: #ffffff;
+  --color-panel-muted: #f7f7f8;
+  --color-workspace: #e8e9ed;
+  --color-hairline: #e4e6eb;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+
+  --shadow-panel: 0 1px 2px rgb(17 20 28 / 0.06), 0 4px 16px rgb(17 20 28 / 0.06);
+  --shadow-pop: 0 8px 32px rgb(17 20 28 / 0.14);
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: var(--color-panel);
+    color: var(--color-ink-900);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* The editor owns its own scroll containers; never bounce the page. */
+  body:has([data-editor-root]) {
+    overflow: hidden;
+    overscroll-behavior: none;
+  }
+
+  ::selection {
+    background-color: var(--color-brand-200);
+  }
+}
+
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--color-ink-200) transparent;
+  }
+}
