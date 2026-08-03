@@ -5,6 +5,8 @@ import { IconButton } from "@/components/ui/IconButton";
 import { useUiStore } from "@/store/uiStore";
 import { PANEL_MAP } from "./panelConfig";
 import { TextPanel } from "./panels/TextPanel";
+import { ShapesPanel } from "./panels/ShapesPanel";
+import { IconsPanel } from "./panels/IconsPanel";
 
 /**
  * Drawer beside the rail. Panels are registered here as their features land;
@@ -39,6 +41,10 @@ export function PanelDrawer() {
       <div className="scrollbar-thin flex-1 overflow-y-auto p-3">
         {activePanel === "text" ? (
           <TextPanel />
+        ) : activePanel === "shapes" ? (
+          <ShapesPanel />
+        ) : activePanel === "icons" ? (
+          <IconsPanel />
         ) : (
           <p className="rounded-lg bg-panel-muted p-3 text-sm leading-relaxed text-ink-500">
             {summary}

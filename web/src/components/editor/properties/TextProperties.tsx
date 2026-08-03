@@ -160,22 +160,9 @@ export function TextProperties({ target }: { target: Textbox }) {
       </FieldGroup>
 
       <FieldGroup title="Appearance">
+        {/* Opacity and rotation live in the shared Arrange section. */}
         <Field label="Colour">
           <ColorInput value={fill} onChange={(value) => update({ fill: value })} />
-        </Field>
-
-        <Field label="Opacity" stacked>
-          <div className="flex items-center gap-2">
-            <Slider
-              value={Math.round((target.opacity ?? 1) * 100)}
-              min={0}
-              max={100}
-              onChange={(value) => update({ opacity: value / 100 })}
-            />
-            <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-ink-500">
-              {Math.round((target.opacity ?? 1) * 100)}%
-            </span>
-          </div>
         </Field>
       </FieldGroup>
     </>

@@ -7,6 +7,9 @@ import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { getMeta } from "@/lib/canvas/meta";
 import { TextProperties } from "./TextProperties";
+import { ShapeProperties } from "./ShapeProperties";
+import { IconProperties } from "./IconProperties";
+import { ArrangeProperties } from "./ArrangeProperties";
 
 /**
  * Right sidebar. Shows the selected element's properties; with nothing selected
@@ -63,13 +66,16 @@ export function PropertiesPanel() {
             Editing several elements at once is limited to duplicate and delete
             for now.
           </p>
-        ) : meta?.kind === "text" && target ? (
-          <TextProperties target={target as Textbox} />
-        ) : (
-          <p className="p-3 text-sm text-ink-500">
-            Properties for this element type arrive with its own feature.
-          </p>
-        )}
+        ) : target ? (
+          <>
+            {meta?.kind === "text" ? (
+              <TextProperties target={target as Textbox} />
+            ) : null}
+            {meta?.kind === "shape" ? <ShapeProperties target={target} /> : null}
+            {meta?.kind === "icon" ? <IconProperties target={target} /> : null}
+            <ArrangeProperties target={target} />
+          </>
+        ) : null}
       </div>
     </aside>
   );

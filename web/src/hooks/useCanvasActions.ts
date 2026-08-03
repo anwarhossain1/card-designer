@@ -10,9 +10,15 @@ import {
   updateSelected,
 } from "@/lib/canvas/actions";
 import { createTextElement } from "@/lib/canvas/elements/text";
+import { createShapeElement } from "@/lib/canvas/elements/shape";
+import {
+  createIconElement,
+  setIconColor,
+  setIconStrokeWidth,
+} from "@/lib/canvas/elements/icon";
 import { loadFont } from "@/lib/fonts/loader";
 import { DEFAULT_FONT_FAMILY } from "@/config/fonts";
-import type { TextVariant } from "@/types/element";
+import type { ShapeVariant, TextVariant } from "@/types/element";
 
 /**
  * Element operations bound to the live canvas. Components call these instead of
@@ -32,6 +38,48 @@ export function useCanvasActions() {
       const element = createTextElement(variant);
       addElement(canvas, element);
       element.initDimensions();
+      canvas.requestRenderAll();
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  const addShape = useCallback(
+    (variant: ShapeVariant) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      addElement(canvas, createShapeElement(variant));
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  const addIcon = useCallback(
+    async (iconId: string) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const element = await createIconElement(iconId);
+      if (!element) return;
+
+      addElement(canvas, element);
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  /** Icons are stroke-drawn groups, so style changes walk their parts. */
+  const setIconStyle = useCallback(
+    ({ color, strokeWidth }: { color?: string; strokeWidth?: number }) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      canvas.getActiveObjects().forEach((object) => {
+        if (color) setIconColor(object, color);
+        if (strokeWidth !== undefined) setIconStrokeWidth(object, strokeWidth);
+      });
+
       canvas.requestRenderAll();
       refresh();
     },
@@ -98,5 +146,16 @@ export function useCanvasActions() {
     canvas.requestRenderAll();
   }, [canvasRef]);
 
-  return { addText, update, updateFontFamily, remove, duplicate, nudge, deselect };
+  return {
+    addText,
+    addShape,
+    addIcon,
+    setIconStyle,
+    update,
+    updateFontFamily,
+    remove,
+    duplicate,
+    nudge,
+    deselect,
+  };
 }
