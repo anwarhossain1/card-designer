@@ -71,6 +71,18 @@
   }
 }
 
+@layer components {
+  /*
+   * Fabric injects a .canvas-container wrapper around the artwork canvas.
+   * It must sit between the paper underlay (z-0) and the guide overlay (z-20).
+   */
+  [data-canvas-layers] > .canvas-container {
+    position: absolute !important;
+    inset: 0;
+    z-index: 10;
+  }
+}
+
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
