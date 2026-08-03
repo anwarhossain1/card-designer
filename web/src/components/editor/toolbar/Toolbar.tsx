@@ -8,13 +8,12 @@ import {
   Copy,
   ClipboardPaste,
   CopyPlus,
-  Download,
   Redo2,
   Trash2,
   Undo2,
 } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
-import { Button } from "@/components/ui/Button";
+import { DownloadMenu } from "./DownloadMenu";
 import { useEditorStore } from "@/store/editorStore";
 import { useCanvas } from "../canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
@@ -125,10 +124,7 @@ export function Toolbar() {
       </div>
 
       <div className="flex items-center gap-2">
-        <Button size="sm" variant="outline" disabled>
-          <Download className="h-4 w-4" />
-          Download
-        </Button>
+        <DownloadMenu />
       </div>
     </header>
   );
