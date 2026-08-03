@@ -4,6 +4,7 @@ import type { FabricObject } from "fabric";
 import { Field, FieldGroup } from "@/components/ui/Field";
 import { NumberInput, Slider } from "@/components/ui/inputs";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { pxToInches, round } from "@/lib/utils/units";
 
 /**
@@ -11,14 +12,15 @@ import { pxToInches, round } from "@/lib/utils/units";
  * live in exactly one place regardless of what is selected.
  */
 export function ArrangeProperties({ target }: { target: FabricObject }) {
+  const t = useT().editor.properties;
   const { update } = useCanvasActions();
 
   const angle = Math.round(target.angle ?? 0);
   const opacity = Math.round((target.opacity ?? 1) * 100);
 
   return (
-    <FieldGroup title="Arrange">
-      <Field label="Rotation" stacked>
+    <FieldGroup title={t.arrange}>
+      <Field label={t.rotation} stacked>
         <div className="flex items-center gap-2">
           <Slider
             value={angle}
@@ -37,7 +39,7 @@ export function ArrangeProperties({ target }: { target: FabricObject }) {
         </div>
       </Field>
 
-      <Field label="Opacity" stacked>
+      <Field label={t.opacity} stacked>
         <div className="flex items-center gap-2">
           <Slider
             value={opacity}
@@ -52,8 +54,10 @@ export function ArrangeProperties({ target }: { target: FabricObject }) {
       </Field>
 
       <p className="text-[11px] text-ink-400">
-        {round(pxToInches(target.getScaledWidth()), 2)} ×{" "}
-        {round(pxToInches(target.getScaledHeight()), 2)} in on the card
+        {t.sizeOnCard(
+          String(round(pxToInches(target.getScaledWidth()), 2)),
+          String(round(pxToInches(target.getScaledHeight()), 2)),
+        )}
       </p>
     </FieldGroup>
   );

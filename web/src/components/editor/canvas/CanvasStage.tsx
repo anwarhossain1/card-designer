@@ -4,6 +4,7 @@ import { useState, type DragEvent } from "react";
 import { cn } from "@/lib/utils/cn";
 import { useUploads } from "@/hooks/useUploads";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { useCanvas } from "./CanvasProvider";
 import { ZoomBar } from "./ZoomBar";
 
@@ -14,6 +15,7 @@ import { ZoomBar } from "./ZoomBar";
  *   2 — guide overlay (bleed, trim, safe area, grid)
  */
 export function CanvasStage() {
+  const t = useT().editor.canvas;
   const { containerRef, canvasElRef, underlayRef, overlayRef, isReady } =
     useCanvas();
   const { ingest } = useUploads();
@@ -66,12 +68,12 @@ export function CanvasStage() {
             isDropping ? "opacity-100" : "opacity-0",
           )}
         >
-          Drop to add to the card
+          {t.dropHere}
         </div>
 
         {!isReady ? (
           <div className="absolute inset-0 grid place-items-center text-sm text-ink-400">
-            Preparing canvas…
+            {t.preparing}
           </div>
         ) : null}
       </div>

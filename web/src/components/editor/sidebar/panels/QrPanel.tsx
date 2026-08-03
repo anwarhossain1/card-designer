@@ -5,6 +5,7 @@ import { QrCode } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { QrForm } from "@/components/editor/qr/QrForm";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import {
   DEFAULT_QR_CONFIG,
   encodeQrPayload,
@@ -12,6 +13,7 @@ import {
 } from "@/lib/qr/config";
 
 export function QrPanel() {
+  const t = useT().editor.qr;
   const { addQr } = useCanvasActions();
   const [config, setConfig] = useState<QrConfig>(DEFAULT_QR_CONFIG);
 
@@ -28,13 +30,11 @@ export function QrPanel() {
         onClick={() => void addQr(config)}
       >
         <QrCode className="h-4 w-4" />
-        Add QR code
+        {t.add}
       </Button>
 
       <p className="px-1 text-[11px] leading-relaxed text-ink-400">
-        {isReady
-          ? "Keep the code at least 0.4 in wide and test a print before ordering."
-          : "Fill in the details above to generate a code."}
+        {isReady ? t.ready : t.empty}
       </p>
     </div>
   );

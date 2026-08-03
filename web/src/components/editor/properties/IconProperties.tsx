@@ -4,21 +4,23 @@ import type { FabricObject } from "fabric";
 import { Field, FieldGroup } from "@/components/ui/Field";
 import { ColorInput, NumberInput, Slider } from "@/components/ui/inputs";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { getIconColor, getIconStrokeWidth } from "@/lib/canvas/elements/icon";
 
 export function IconProperties({ target }: { target: FabricObject }) {
+  const t = useT().editor.properties;
   const { setIconStyle } = useCanvasActions();
 
   const color = getIconColor(target);
   const weight = getIconStrokeWidth(target);
 
   return (
-    <FieldGroup title="Icon">
-      <Field label="Colour">
+    <FieldGroup title={t.icon}>
+      <Field label={t.colour}>
         <ColorInput value={color} onChange={(value) => setIconStyle({ color: value })} />
       </Field>
 
-      <Field label="Line weight" stacked>
+      <Field label={t.lineWeight} stacked>
         <div className="flex items-center gap-2">
           <Slider
             value={weight}

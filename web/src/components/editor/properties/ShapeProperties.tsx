@@ -4,12 +4,14 @@ import type { FabricObject, Rect } from "fabric";
 import { Field, FieldGroup } from "@/components/ui/Field";
 import { ColorInput, NumberInput, Slider } from "@/components/ui/inputs";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { buildShadow, SHADOW_PRESET } from "@/lib/canvas/elements/shape";
 
 const isRect = (object: FabricObject) => object.type === "rect";
 const isLine = (object: FabricObject) => object.type === "line";
 
 export function ShapeProperties({ target }: { target: FabricObject }) {
+  const t = useT().editor.properties;
   const { update } = useCanvasActions();
 
   const fill = typeof target.fill === "string" ? target.fill : "#6c4cff";
@@ -20,27 +22,25 @@ export function ShapeProperties({ target }: { target: FabricObject }) {
 
   return (
     <>
-      <FieldGroup title="Fill">
+      <FieldGroup title={t.fill}>
         {isLine(target) ? (
-          <p className="text-[11px] text-ink-400">
-            Lines are drawn with the border colour below.
-          </p>
+          <p className="text-[11px] text-ink-400">{t.lineOnlyNote}</p>
         ) : (
-          <Field label="Colour">
+          <Field label={t.colour}>
             <ColorInput value={fill} onChange={(value) => update({ fill: value })} />
           </Field>
         )}
       </FieldGroup>
 
-      <FieldGroup title="Border">
-        <Field label="Colour">
+      <FieldGroup title={t.border}>
+        <Field label={t.colour}>
           <ColorInput
             value={stroke || "#11141c"}
             onChange={(value) => update({ stroke: value })}
           />
         </Field>
 
-        <Field label="Width" stacked>
+        <Field label={t.width} stacked>
           <div className="flex items-center gap-2">
             <Slider
               value={strokeWidth}
@@ -67,7 +67,7 @@ export function ShapeProperties({ target }: { target: FabricObject }) {
         </Field>
 
         {isRect(target) ? (
-          <Field label="Corner radius" stacked>
+          <Field label={t.cornerRadius} stacked>
             <div className="flex items-center gap-2">
               <Slider
                 value={radius}
@@ -87,8 +87,8 @@ export function ShapeProperties({ target }: { target: FabricObject }) {
         ) : null}
       </FieldGroup>
 
-      <FieldGroup title="Shadow">
-        <Field label="Drop shadow">
+      <FieldGroup title={t.shadow}>
+        <Field label={t.dropShadow}>
           <label className="flex items-center gap-2 text-xs text-ink-600">
             <input
               type="checkbox"
@@ -98,13 +98,13 @@ export function ShapeProperties({ target }: { target: FabricObject }) {
               }
               className="h-4 w-4 accent-brand-600"
             />
-            {shadow ? "On" : "Off"}
+            {shadow ? t.on : t.off}
           </label>
         </Field>
 
         {shadow ? (
           <>
-            <Field label="Blur" stacked>
+            <Field label={t.blur} stacked>
               <Slider
                 value={shadow.blur ?? SHADOW_PRESET.blur}
                 min={0}
@@ -112,7 +112,7 @@ export function ShapeProperties({ target }: { target: FabricObject }) {
                 onChange={(value) => update({ shadow: buildShadow({ blur: value, offsetY: shadow.offsetY }) })}
               />
             </Field>
-            <Field label="Distance" stacked>
+            <Field label={t.distance} stacked>
               <Slider
                 value={shadow.offsetY ?? SHADOW_PRESET.offsetY}
                 min={-20}

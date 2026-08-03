@@ -16,13 +16,21 @@ export interface UploadedAsset {
   height: number;
 }
 
-export class UploadError extends Error {}
+export type UploadErrorCode = "type" | "size" | "read";
+
+/** Carries a code, not a sentence — the message is chosen per locale in the UI. */
+export class UploadError extends Error {
+  constructor(readonly code: UploadErrorCode) {
+    super(code);
+    this.name = "UploadError";
+  }
+}
 
 const readAsDataUrl = (file: File) =>
   new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
     reader.onload = () => resolve(String(reader.result));
-    reader.onerror = () => reject(new UploadError("Could not read that file"));
+    reader.onerror = () => reject(new UploadError("read"));
     reader.readAsDataURL(file);
   });
 
@@ -44,11 +52,11 @@ export async function readImageFile(
   createId: (prefix: string) => string,
 ): Promise<UploadedAsset> {
   if (!ACCEPTED_UPLOAD_TYPES.includes(file.type as (typeof ACCEPTED_UPLOAD_TYPES)[number])) {
-    throw new UploadError("Use a PNG, JPEG or SVG file");
+    throw new UploadError("type");
   }
 
   if (file.size > MAX_UPLOAD_BYTES) {
-    throw new UploadError("That file is larger than 8 MB");
+    throw new UploadError("size");
   }
 
   const dataUrl = await readAsDataUrl(file);

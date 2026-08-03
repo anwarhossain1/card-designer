@@ -5,6 +5,7 @@ import type { FabricObject } from "fabric";
 import { FieldGroup } from "@/components/ui/Field";
 import { QrForm } from "@/components/editor/qr/QrForm";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { getQrConfig } from "@/lib/canvas/elements/qr";
 import { DEFAULT_QR_CONFIG, encodeQrPayload } from "@/lib/qr/config";
 import { pxToInches, round } from "@/lib/utils/units";
@@ -21,6 +22,7 @@ const MIN_SCAN_INCHES = 0.4;
  * Mounted with `key={element id}`, so selecting another code starts fresh.
  */
 export function QrProperties({ target }: { target: FabricObject }) {
+  const t = useT().editor;
   const { updateQr } = useCanvasActions();
   const [draft, setDraft] = useState(() => getQrConfig(target) ?? DEFAULT_QR_CONFIG);
 
@@ -29,7 +31,7 @@ export function QrProperties({ target }: { target: FabricObject }) {
   const isEmpty = !encodeQrPayload(draft);
 
   return (
-    <FieldGroup title="QR code">
+    <FieldGroup title={t.panels.qr}>
       <QrForm
         value={draft}
         onChange={(next) => {
@@ -40,8 +42,7 @@ export function QrProperties({ target }: { target: FabricObject }) {
 
       {isEmpty ? (
         <p className="rounded-md bg-warning-surface px-2 py-1.5 text-[11px] text-warning-ink">
-          Fill in the details to update the code — the card still shows the last
-          one that encoded.
+          {t.qr.emptyEdit}
         </p>
       ) : (
         <p
@@ -52,8 +53,11 @@ export function QrProperties({ target }: { target: FabricObject }) {
           }
         >
           {isReadable
-            ? `${round(widthInches, 2)} in wide — fine for scanning.`
-            : `${round(widthInches, 2)} in wide. Scale it up to at least ${MIN_SCAN_INCHES} in so phones can read it in print.`}
+            ? t.qr.sizeOk(String(round(widthInches, 2)))
+            : t.qr.sizeWarn(
+                String(round(widthInches, 2)),
+                String(MIN_SCAN_INCHES),
+              )}
         </p>
       )}
     </FieldGroup>

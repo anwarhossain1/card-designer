@@ -10,21 +10,26 @@ import {
 } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { useLayers } from "@/hooks/useLayers";
+import { useT } from "@/components/i18n/I18nProvider";
 import type { MoveDirection } from "@/lib/canvas/layers";
 import { LayerRow } from "./LayerRow";
 
-const MOVE_ACTIONS: {
-  direction: MoveDirection;
-  label: string;
-  icon: typeof ArrowUp;
-}[] = [
-  { direction: "front", label: "Bring to front", icon: ArrowUpToLine },
-  { direction: "forward", label: "Bring forward", icon: ArrowUp },
-  { direction: "backward", label: "Send backward", icon: ArrowDown },
-  { direction: "back", label: "Send to back", icon: ArrowDownToLine },
+const MOVE_ACTIONS: { direction: MoveDirection; icon: typeof ArrowUp }[] = [
+  { direction: "front", icon: ArrowUpToLine },
+  { direction: "forward", icon: ArrowUp },
+  { direction: "backward", icon: ArrowDown },
+  { direction: "back", icon: ArrowDownToLine },
 ];
 
+const MOVE_LABEL_KEY = {
+  front: "bringFront",
+  forward: "bringForward",
+  backward: "sendBackward",
+  back: "sendBack",
+} as const;
+
 export function LayersPanel() {
+  const t = useT().editor.layers;
   const {
     layers,
     selectedIds,
@@ -65,10 +70,7 @@ export function LayersPanel() {
     return (
       <div className="flex flex-col items-center gap-3 rounded-lg bg-panel-muted px-4 py-10 text-center">
         <Layers className="h-6 w-6 text-ink-300" />
-        <p className="text-sm text-ink-500">
-          Nothing on the card yet. Add text, a shape or an icon and it will
-          appear here.
-        </p>
+        <p className="text-sm text-ink-500">{t.empty}</p>
       </div>
     );
   }
@@ -76,11 +78,11 @@ export function LayersPanel() {
   return (
     <div className="space-y-3">
       <div className="flex items-center gap-0.5 rounded-lg bg-panel-muted p-1">
-        {MOVE_ACTIONS.map(({ direction, label, icon: Icon }) => (
+        {MOVE_ACTIONS.map(({ direction, icon: Icon }) => (
           <IconButton
             key={direction}
             size="sm"
-            label={label}
+            label={t[MOVE_LABEL_KEY[direction]]}
             disabled={!activeId}
             onClick={() => activeId && move(activeId, direction)}
           >
@@ -88,7 +90,7 @@ export function LayersPanel() {
           </IconButton>
         ))}
         <span className="ml-auto pr-1 text-[11px] text-ink-400">
-          {layers.length} layer{layers.length > 1 ? "s" : ""}
+          {t.count(layers.length)}
         </span>
       </div>
 
@@ -116,7 +118,7 @@ export function LayersPanel() {
       </ul>
 
       <p className="px-1 text-[11px] leading-relaxed text-ink-400">
-        Drag a layer to reorder. The top of this list is the front of the card.
+        {t.dragHint}
       </p>
     </div>
   );

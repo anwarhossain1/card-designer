@@ -7,9 +7,11 @@ import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils/cn";
 import { useUploads } from "@/hooks/useUploads";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { ACCEPTED_UPLOAD_TYPES } from "@/lib/uploads/readFile";
 
 export function UploadsPanel() {
+  const t = useT().editor.uploads;
   const { assets, ingest, remove, error } = useUploads();
   const { addImage } = useCanvasActions();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -38,13 +40,11 @@ export function UploadsPanel() {
         )}
       >
         <Upload className="h-5 w-5 text-ink-400" />
-        <p className="text-xs text-ink-500">
-          Drop a logo or photo here, or
-        </p>
+        <p className="text-xs text-ink-500">{t.dropPrompt}</p>
         <Button size="sm" variant="outline" onClick={() => inputRef.current?.click()}>
-          Choose a file
+          {t.choose}
         </Button>
-        <p className="text-[11px] text-ink-400">PNG, JPEG or SVG · up to 8 MB</p>
+        <p className="text-[11px] text-ink-400">{t.limits}</p>
 
         <input
           ref={inputRef}
@@ -64,7 +64,11 @@ export function UploadsPanel() {
           role="alert"
           className="rounded-md bg-danger-surface px-3 py-2 text-xs text-danger-ink"
         >
-          {error}
+          {error === "type"
+            ? t.errorType
+            : error === "size"
+              ? t.errorSize
+              : t.errorGeneric}
         </p>
       ) : null}
 
@@ -75,7 +79,8 @@ export function UploadsPanel() {
               <button
                 type="button"
                 onClick={() => void addImage(asset)}
-                title={`Add ${asset.name}`}
+                title={t.add(asset.name)}
+                data-asset={asset.name}
                 className="flex aspect-square w-full items-center justify-center overflow-hidden rounded-lg border border-hairline bg-panel-muted p-2 transition-colors hover:border-brand-200 hover:bg-brand-50"
               >
                 {/* Data URLs bypass the image optimiser, so a plain img is right here. */}
@@ -88,7 +93,7 @@ export function UploadsPanel() {
               </button>
               <IconButton
                 size="sm"
-                label={`Remove ${asset.name} from uploads`}
+                label={t.remove(asset.name)}
                 onClick={() => remove(asset.id)}
                 className="absolute right-1 top-1 bg-panel/90 opacity-0 transition-opacity group-hover:opacity-100"
               >
@@ -98,10 +103,7 @@ export function UploadsPanel() {
           ))}
         </ul>
       ) : (
-        <p className="px-1 text-[11px] leading-relaxed text-ink-400">
-          Uploads stay in this browser session. The design keeps its own copy of
-          every image, so a saved card always reopens complete.
-        </p>
+        <p className="px-1 text-[11px] leading-relaxed text-ink-400">{t.note}</p>
       )}
     </div>
   );

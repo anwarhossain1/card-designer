@@ -7,6 +7,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { useLayers } from "@/hooks/useLayers";
+import { useT } from "@/components/i18n/I18nProvider";
 import { getMeta } from "@/lib/canvas/meta";
 import { TextProperties } from "./TextProperties";
 import { ShapeProperties } from "./ShapeProperties";
@@ -20,6 +21,7 @@ import { ArrangeProperties } from "./ArrangeProperties";
  * it explains what to do, the way Canva does.
  */
 export function PropertiesPanel() {
+  const t = useT().editor;
   const { selected } = useCanvas();
   const { remove, duplicate } = useCanvasActions();
   const { toggleLock } = useLayers();
@@ -30,28 +32,29 @@ export function PropertiesPanel() {
 
   return (
     <aside
-      aria-label="Properties"
+      aria-label={t.properties.title}
+      data-properties
       className="flex w-72 shrink-0 flex-col border-l border-hairline bg-panel"
     >
       <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hairline px-3">
         <h2 className="truncate text-sm font-semibold text-ink-800">
           {selected.length === 0
-            ? "Properties"
+            ? t.properties.title
             : isMultiple
-              ? `${selected.length} elements`
-              : (meta?.name ?? "Element")}
+              ? t.properties.multiple(selected.length)
+              : (meta?.name ?? t.properties.title)}
         </h2>
 
         {selected.length > 0 ? (
           <div className="flex items-center gap-0.5">
             <IconButton
               size="sm"
-              label="Duplicate (Ctrl+D)"
+              label={t.toolbar.duplicate}
               onClick={() => void duplicate()}
             >
               <CopyPlus className="h-4 w-4" />
             </IconButton>
-            <IconButton size="sm" label="Delete (Del)" onClick={remove}>
+            <IconButton size="sm" label={t.toolbar.delete} onClick={remove}>
               <Trash2 className="h-4 w-4" />
             </IconButton>
           </div>
@@ -62,23 +65,16 @@ export function PropertiesPanel() {
         {selected.length === 0 ? (
           <div className="m-3 flex flex-col items-center gap-3 rounded-lg bg-panel-muted px-4 py-10 text-center">
             <MousePointerSquareDashed className="h-6 w-6 text-ink-300" />
-            <p className="text-sm text-ink-500">
-              Select something on the card to edit its properties.
-            </p>
+            <p className="text-sm text-ink-500">{t.properties.empty}</p>
           </div>
         ) : isMultiple ? (
-          <p className="p-3 text-sm text-ink-500">
-            Editing several elements at once is limited to duplicate and delete
-            for now.
-          </p>
+          <p className="p-3 text-sm text-ink-500">{t.properties.multipleNote}</p>
         ) : meta?.locked ? (
           <div className="m-3 space-y-3 rounded-lg bg-panel-muted px-4 py-6 text-center">
             <Lock className="mx-auto h-5 w-5 text-ink-400" />
-            <p className="text-sm text-ink-500">
-              This element is locked. Unlock it to edit its properties.
-            </p>
+            <p className="text-sm text-ink-500">{t.properties.lockedNote}</p>
             <Button size="sm" variant="outline" onClick={() => toggleLock(meta.id)}>
-              Unlock
+              {t.properties.unlock}
             </Button>
           </div>
         ) : target ? (

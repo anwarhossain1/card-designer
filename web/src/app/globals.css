@@ -42,7 +42,9 @@
   --color-danger-surface: #fef2f2;
   --color-danger-ink: #b91c1c;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Inter has no Bengali glyphs; the browser falls through per codepoint. */
+  --font-sans: var(--font-inter), var(--font-bengali), ui-sans-serif, system-ui,
+    sans-serif;
 
   --radius-xs: 4px;
   --radius-sm: 6px;

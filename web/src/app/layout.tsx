@@ -1,7 +1,8 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Noto_Sans_Bengali } from "next/font/google";
 import { Providers } from "./providers";
 import { THEME_INIT_SCRIPT } from "@/lib/theme/theme";
+import { DEFAULT_LOCALE, LOCALE_INIT_SCRIPT } from "@/lib/i18n/config";
 import "./globals.css";
 
 const inter = Inter({
@@ -10,13 +11,24 @@ const inter = Inter({
   display: "swap",
 });
 
+/**
+ * Bengali UI face. Inter carries no Bengali glyphs, so both families sit in the
+ * same `--font-sans` stack: the browser falls through per codepoint, which
+ * handles mixed Bangla/English strings without switching fonts by locale.
+ */
+const notoBengali = Noto_Sans_Bengali({
+  variable: "--font-bengali",
+  subsets: ["bengali"],
+  display: "swap",
+});
+
 export const metadata: Metadata = {
   title: {
-    default: "CardCraft — Design business cards online",
+    default: "CardCraft — ব্রাউজারেই ভিজিটিং কার্ড ডিজাইন",
     template: "%s · CardCraft",
   },
   description:
-    "Design print-ready business cards in your browser. Start from a template or a blank 3.5 × 2 inch card, then download as PNG, JPEG or PDF.",
+    "ব্রাউজারেই প্রিন্ট-রেডি ভিজিটিং কার্ড ডিজাইন করুন। টেমপ্লেট বা খালি ৩.৫ × ২ ইঞ্চি কার্ড থেকে শুরু করে PNG, JPEG বা PDF ডাউনলোড করুন।",
 };
 
 export const viewport: Viewport = {
@@ -29,11 +41,17 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    /* suppressHydrationWarning: the inline script sets data-theme before React. */
-    <html lang="en" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    /* suppressHydrationWarning: inline scripts set data-theme and lang first. */
+    <html
+      lang={DEFAULT_LOCALE}
+      className={`${inter.variable} ${notoBengali.variable} h-full`}
+      suppressHydrationWarning
+    >
       <head>
         <script
-          dangerouslySetInnerHTML={{ __html: THEME_INIT_SCRIPT }}
+          dangerouslySetInnerHTML={{
+            __html: `${THEME_INIT_SCRIPT}\n${LOCALE_INIT_SCRIPT}`,
+          }}
           suppressHydrationWarning
         />
       </head>

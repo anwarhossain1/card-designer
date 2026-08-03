@@ -8,16 +8,12 @@ import { ColorInput, Slider } from "@/components/ui/inputs";
 import { cn } from "@/lib/utils/cn";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { useUploads } from "@/hooks/useUploads";
+import { useT } from "@/components/i18n/I18nProvider";
 import { PATTERNS } from "@/lib/canvas/patterns";
 
 type Tab = "solid" | "gradient" | "image" | "pattern";
 
-const TABS: { id: Tab; label: string }[] = [
-  { id: "solid", label: "Solid" },
-  { id: "gradient", label: "Gradient" },
-  { id: "image", label: "Image" },
-  { id: "pattern", label: "Pattern" },
-];
+const TABS: Tab[] = ["solid", "gradient", "image", "pattern"];
 
 const SWATCHES = [
   "#ffffff", "#f7f7f8", "#11141c", "#1f2430", "#12325c",
@@ -25,6 +21,7 @@ const SWATCHES = [
 ];
 
 export function BackgroundPanel() {
+  const t = useT().editor.background;
   const { setBackground } = useCanvasActions();
   const { assets } = useUploads();
 
@@ -41,18 +38,19 @@ export function BackgroundPanel() {
       <div className="flex gap-0.5 rounded-lg bg-panel-muted p-0.5">
         {TABS.map((entry) => (
           <button
-            key={entry.id}
+            key={entry}
             type="button"
-            onClick={() => setTab(entry.id)}
-            aria-pressed={tab === entry.id}
+            onClick={() => setTab(entry)}
+            aria-pressed={tab === entry}
+            data-tab={entry}
             className={cn(
               "flex-1 rounded-[6px] px-2 py-1.5 text-[11px] font-medium transition-colors",
-              tab === entry.id
+              tab === entry
                 ? "bg-panel text-brand-700 shadow-sm"
                 : "text-ink-500 hover:text-ink-800",
             )}
           >
-            {entry.label}
+            {t[entry]}
           </button>
         ))}
       </div>
@@ -64,7 +62,8 @@ export function BackgroundPanel() {
               <li key={color}>
                 <button
                   type="button"
-                  aria-label={`Background ${color}`}
+                  aria-label={t.swatch(color)}
+                  data-swatch={color}
                   onClick={() => {
                     setSolid(color);
                     setBackground({ kind: "solid", color });
@@ -75,7 +74,7 @@ export function BackgroundPanel() {
               </li>
             ))}
           </ul>
-          <Field label="Custom">
+          <Field label={t.custom}>
             <ColorInput
               value={solid}
               onChange={(color) => {
@@ -89,13 +88,13 @@ export function BackgroundPanel() {
 
       {tab === "gradient" ? (
         <div className="space-y-3">
-          <Field label="From">
+          <Field label={t.from}>
             <ColorInput value={from} onChange={setFrom} />
           </Field>
-          <Field label="To">
+          <Field label={t.to}>
             <ColorInput value={to} onChange={setTo} />
           </Field>
-          <Field label="Angle" stacked>
+          <Field label={t.angle} stacked>
             <div className="flex items-center gap-2">
               <Slider value={angle} min={0} max={360} step={15} onChange={setAngle} />
               <span className="w-10 shrink-0 text-right text-[11px] tabular-nums text-ink-500">
@@ -113,7 +112,7 @@ export function BackgroundPanel() {
             className="w-full"
             onClick={() => setBackground({ kind: "gradient", from, to, angle })}
           >
-            Apply gradient
+            {t.apply}
           </Button>
         </div>
       ) : null}
@@ -142,8 +141,7 @@ export function BackgroundPanel() {
           </ul>
         ) : (
           <p className="rounded-lg bg-panel-muted p-3 text-xs leading-relaxed text-ink-500">
-            Add an image in the Uploads panel first — anything you upload can be
-            used as a card background.
+            {t.needUpload}
           </p>
         )
       ) : null}
@@ -163,17 +161,18 @@ export function BackgroundPanel() {
                       foreground: patternInk,
                     })
                   }
+                  data-pattern={pattern.id}
                   className="w-full rounded-lg border border-hairline px-2 py-3 text-[11px] text-ink-600 transition-colors hover:border-brand-200 hover:bg-brand-50"
                 >
-                  {pattern.label}
+                  {t.patterns[pattern.id]}
                 </button>
               </li>
             ))}
           </ul>
-          <Field label="Base">
+          <Field label={t.base}>
             <ColorInput value={patternBase} onChange={setPatternBase} />
           </Field>
-          <Field label="Ink">
+          <Field label={t.ink}>
             <ColorInput value={patternInk} onChange={setPatternInk} />
           </Field>
         </div>
@@ -186,7 +185,7 @@ export function BackgroundPanel() {
         onClick={() => setBackground({ kind: "none" })}
       >
         <Ban className="h-4 w-4" />
-        No background
+        {t.none}
       </Button>
     </div>
   );

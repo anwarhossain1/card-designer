@@ -1,9 +1,14 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { useT } from "@/components/i18n/I18nProvider";
 
 export function CtaBand() {
+  const t = useT();
+
   return (
     <section className="pb-20 sm:pb-24">
       <Container>
@@ -18,11 +23,10 @@ export function CtaBand() {
           />
 
           <h2 className="relative text-3xl font-semibold tracking-tight text-white sm:text-4xl">
-            Your next card is a few clicks away
+            {t.landing.cta.title}
           </h2>
           <p className="relative mx-auto mt-4 max-w-xl text-white/85">
-            Open the editor and start designing. Your work saves automatically in
-            this browser.
+            {t.landing.cta.body}
           </p>
           <div className="relative mt-8 flex justify-center">
             <Link href="/editor">
@@ -30,7 +34,7 @@ export function CtaBand() {
                 size="lg"
                 className="group bg-white text-brand-700 hover:bg-white/90 active:bg-white/80"
               >
-                Start Designing
+                {t.landing.nav.startDesigning}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </Link>

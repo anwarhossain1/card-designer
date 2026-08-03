@@ -1,0 +1,12 @@
+import type { Dictionary } from "../en";
+import { landing } from "./landing";
+import { editor } from "./editor";
+
+export const bn: Dictionary = {
+  common: {
+    language: "ভাষা",
+    switchLanguage: "Switch to English",
+  },
+  landing,
+  editor,
+};

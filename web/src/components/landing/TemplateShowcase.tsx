@@ -1,18 +1,23 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { Container } from "@/components/ui/Container";
+import { useT } from "@/components/i18n/I18nProvider";
 import { SectionHeading } from "./SectionHeading";
 import { CardPreview } from "./card-preview/CardPreview";
 import { CARD_PREVIEWS } from "./card-preview/data";
 
 export function TemplateShowcase() {
+  const t = useT();
+
   return (
     <section id="templates" className="scroll-mt-20 py-20 sm:py-24">
       <Container>
         <SectionHeading
-          eyebrow="Templates"
-          title="Five starting points, all fully editable"
-          description="Every template arrives filled in — name, title, phone, email, website and a logo slot. Change anything, or strip it back to a blank card."
+          eyebrow={t.landing.templates.eyebrow}
+          title={t.landing.templates.title}
+          description={t.landing.templates.description}
         />
 
         <ul className="mt-14 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -44,10 +49,10 @@ export function TemplateShowcase() {
               className="group flex h-full min-h-56 flex-col items-center justify-center gap-2 rounded-xl border border-dashed border-ink-200 bg-panel-muted p-6 text-center transition-colors hover:border-brand-300 hover:bg-brand-50"
             >
               <span className="text-sm font-semibold text-ink-800">
-                Start from blank
+                {t.landing.templates.blankTitle}
               </span>
               <span className="max-w-[16rem] text-sm text-ink-500">
-                An empty 3.5 × 2 in card with guides, safe area and bleed ready.
+                {t.landing.templates.blankBody}
               </span>
             </Link>
           </li>

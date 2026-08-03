@@ -18,6 +18,7 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { cn } from "@/lib/utils/cn";
+import { useT } from "@/components/i18n/I18nProvider";
 import type { LayerItem } from "@/lib/canvas/layers";
 import type { ElementKind } from "@/types/element";
 
@@ -62,6 +63,7 @@ export function LayerRow({
   onDrop,
   onDragEnd,
 }: LayerRowProps) {
+  const t = useT().editor.layers;
   const Icon = KIND_ICON[layer.kind];
 
   return (
@@ -94,7 +96,7 @@ export function LayerRow({
       <span className="flex shrink-0 items-center">
         <IconButton
           size="sm"
-          label={layer.visible ? "Hide layer" : "Show layer"}
+          label={layer.visible ? t.hide : t.show}
           onClick={() => onToggleVisibility(layer.id)}
           className={cn(!layer.visible && "text-brand-600")}
         >
@@ -107,7 +109,7 @@ export function LayerRow({
 
         <IconButton
           size="sm"
-          label={layer.locked ? "Unlock layer" : "Lock layer"}
+          label={layer.locked ? t.unlock : t.lock}
           onClick={() => onToggleLock(layer.id)}
           className={cn(layer.locked && "text-brand-600")}
         >
@@ -121,7 +123,7 @@ export function LayerRow({
         <span className="flex opacity-0 transition-opacity group-hover:opacity-100 group-focus-within:opacity-100">
           <IconButton
             size="sm"
-            label="Duplicate layer"
+            label={t.duplicate}
             disabled={layer.locked}
             onClick={() => onDuplicate(layer.id)}
           >
@@ -129,7 +131,7 @@ export function LayerRow({
           </IconButton>
           <IconButton
             size="sm"
-            label="Delete layer"
+            label={t.delete}
             disabled={layer.locked}
             onClick={() => onDelete(layer.id)}
           >

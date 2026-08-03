@@ -3,6 +3,7 @@
 import { Plus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { TEXT_PRESETS } from "@/lib/canvas/elements/text";
 import { DEFAULT_FONT_FAMILY } from "@/config/fonts";
 
@@ -15,7 +16,14 @@ const PREVIEW_STYLE: Record<string, string> = {
 };
 
 export function TextPanel() {
+  const t = useT().editor.text;
   const { addText } = useCanvasActions();
+
+  const copy = {
+    heading: t.heading,
+    subheading: t.subheading,
+    paragraph: t.body,
+  } as const;
 
   return (
     <div className="space-y-3">
@@ -25,7 +33,7 @@ export function TextPanel() {
         onClick={() => void addText("custom")}
       >
         <Plus className="h-4 w-4" />
-        Add a text box
+        {t.addBox}
       </Button>
 
       <ul className="space-y-2">
@@ -41,10 +49,10 @@ export function TextPanel() {
                 <span
                   className={`block truncate text-ink-900 ${PREVIEW_STYLE[preset.variant]}`}
                 >
-                  {preset.label}
+                  {copy[preset.variant as keyof typeof copy].label}
                 </span>
                 <span className="mt-0.5 block text-[11px] text-ink-400">
-                  {preset.hint}
+                  {copy[preset.variant as keyof typeof copy].hint}
                 </span>
               </button>
             </li>
@@ -53,7 +61,7 @@ export function TextPanel() {
       </ul>
 
       <p className="px-1 text-[11px] leading-relaxed text-ink-400">
-        Double-click any text on the card to edit it in place.
+        {t.editHint}
       </p>
     </div>
   );

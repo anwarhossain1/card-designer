@@ -6,6 +6,7 @@ import {
   readImageFile,
   UploadError,
   type UploadedAsset,
+  type UploadErrorCode,
 } from "@/lib/uploads/readFile";
 import { createId } from "@/lib/utils/id";
 
@@ -17,7 +18,7 @@ export function useUploads() {
   const assets = useUploadsStore((state) => state.assets);
   const add = useUploadsStore((state) => state.add);
   const remove = useUploadsStore((state) => state.remove);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<UploadErrorCode | null>(null);
 
   const ingest = useCallback(
     async (files: FileList | File[]): Promise<UploadedAsset[]> => {
@@ -30,11 +31,7 @@ export function useUploads() {
           add(asset);
           accepted.push(asset);
         } catch (cause) {
-          setError(
-            cause instanceof UploadError
-              ? cause.message
-              : "That file could not be added",
-          );
+          setError(cause instanceof UploadError ? cause.code : "read");
         }
       }
 

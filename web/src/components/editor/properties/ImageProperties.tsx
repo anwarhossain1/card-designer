@@ -7,10 +7,12 @@ import { IconButton } from "@/components/ui/IconButton";
 import { NumberInput, Slider } from "@/components/ui/inputs";
 import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 import { buildShadow, SHADOW_PRESET } from "@/lib/canvas/elements/shape";
 import { getImageRadius, setImageRadius } from "@/lib/canvas/elements/image";
 
 export function ImageProperties({ target }: { target: FabricObject }) {
+  const t = useT().editor.properties;
   const { canvasRef, refresh } = useCanvas();
   const { update } = useCanvasActions();
 
@@ -25,8 +27,8 @@ export function ImageProperties({ target }: { target: FabricObject }) {
 
   return (
     <>
-      <FieldGroup title="Image">
-        <Field label="Corner radius" stacked>
+      <FieldGroup title={t.image}>
+        <Field label={t.cornerRadius} stacked>
           <div className="flex items-center gap-2">
             <Slider value={radius} min={0} max={120} onChange={applyRadius} />
             <NumberInput
@@ -39,11 +41,11 @@ export function ImageProperties({ target }: { target: FabricObject }) {
           </div>
         </Field>
 
-        <Field label="Flip">
+        <Field label={t.flip}>
           <div className="flex items-center gap-0.5">
             <IconButton
               size="sm"
-              label="Flip horizontally"
+              label={t.flipH}
               active={Boolean(target.flipX)}
               onClick={() => update({ flipX: !target.flipX })}
             >
@@ -51,7 +53,7 @@ export function ImageProperties({ target }: { target: FabricObject }) {
             </IconButton>
             <IconButton
               size="sm"
-              label="Flip vertically"
+              label={t.flipV}
               active={Boolean(target.flipY)}
               onClick={() => update({ flipY: !target.flipY })}
             >
@@ -61,8 +63,8 @@ export function ImageProperties({ target }: { target: FabricObject }) {
         </Field>
       </FieldGroup>
 
-      <FieldGroup title="Shadow">
-        <Field label="Drop shadow">
+      <FieldGroup title={t.shadow}>
+        <Field label={t.dropShadow}>
           <label className="flex items-center gap-2 text-xs text-ink-600">
             <input
               type="checkbox"
@@ -72,12 +74,12 @@ export function ImageProperties({ target }: { target: FabricObject }) {
               }
               className="h-4 w-4 accent-brand-600"
             />
-            {shadow ? "On" : "Off"}
+            {shadow ? t.on : t.off}
           </label>
         </Field>
 
         {shadow ? (
-          <Field label="Blur" stacked>
+          <Field label={t.blur} stacked>
             <Slider
               value={shadow.blur ?? SHADOW_PRESET.blur}
               min={0}

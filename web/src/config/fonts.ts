@@ -7,7 +7,7 @@ export interface FontDefinition {
   /** CSS family name, also what Fabric receives. */
   family: string;
   label: string;
-  category: "sans" | "serif" | "display" | "mono";
+  category: "sans" | "serif" | "display" | "mono" | "bengali";
   weights: number[];
   /** Google Fonts spec fragment; null for system stacks. */
   googleSpec: string | null;
@@ -76,6 +76,39 @@ export const FONTS: FontDefinition[] = [
     category: "mono",
     weights: [400, 700],
     googleSpec: "Space+Mono:wght@400;700",
+  },
+
+  /*
+   * Bengali faces. None of the families above carry Bengali glyphs, so without
+   * these a Bangla card renders as fallback boxes at print resolution.
+   */
+  {
+    family: "Noto Sans Bengali",
+    label: "নোটো সান্স — Noto Sans Bengali",
+    category: "bengali",
+    weights: [300, 400, 500, 600, 700],
+    googleSpec: "Noto+Sans+Bengali:wght@300;400;500;600;700",
+  },
+  {
+    family: "Hind Siliguri",
+    label: "হিন্দ শিলিগুড়ি — Hind Siliguri",
+    category: "bengali",
+    weights: [300, 400, 500, 600, 700],
+    googleSpec: "Hind+Siliguri:wght@300;400;500;600;700",
+  },
+  {
+    family: "Baloo Da 2",
+    label: "বালু দা — Baloo Da 2",
+    category: "bengali",
+    weights: [400, 500, 600, 700],
+    googleSpec: "Baloo+Da+2:wght@400;500;600;700",
+  },
+  {
+    family: "Tiro Bangla",
+    label: "টিরো বাংলা — Tiro Bangla",
+    category: "bengali",
+    weights: [400],
+    googleSpec: "Tiro+Bangla",
   },
 ];
 

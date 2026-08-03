@@ -7,11 +7,13 @@ import { cn } from "@/lib/utils/cn";
 import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { useEditorStore } from "@/store/editorStore";
+import { useT } from "@/components/i18n/I18nProvider";
 import { TEMPLATES } from "@/lib/templates";
 import { renderTemplatePreview } from "@/lib/templates/preview";
 import type { CardTemplate } from "@/types/template";
 
 function TemplateCard({ template }: { template: CardTemplate }) {
+  const t = useT().editor.templates;
   const { selectTemplate } = useCanvasActions();
   const activeTemplateId = useEditorStore((state) => state.templateId);
   const [preview, setPreview] = useState<string | null>(null);
@@ -59,7 +61,9 @@ function TemplateCard({ template }: { template: CardTemplate }) {
       </span>
       <span className="mt-2 block text-xs font-semibold text-ink-800">
         {template.name}
-        {isActive ? <span className="ml-1.5 font-normal text-brand-600">· in use</span> : null}
+        {isActive ? (
+          <span className="ml-1.5 font-normal text-brand-600">· {t.inUse}</span>
+        ) : null}
       </span>
       <span className="mt-0.5 block text-[11px] leading-snug text-ink-500">
         {template.description}
@@ -69,6 +73,7 @@ function TemplateCard({ template }: { template: CardTemplate }) {
 }
 
 export function TemplatesPanel() {
+  const t = useT().editor.templates;
   const { canvasRef } = useCanvas();
   // No confirm dialog: applying is a single undoable step, and the notice says so.
   const hasContent = (canvasRef.current?.getObjects().length ?? 0) > 0;
@@ -77,8 +82,7 @@ export function TemplatesPanel() {
     <div className="space-y-3">
       {hasContent ? (
         <p className="rounded-lg bg-warning-surface px-3 py-2 text-[11px] leading-relaxed text-warning-ink">
-          Applying a template replaces what is on the card. Undo brings your
-          design back.
+          {t.replaceWarning}
         </p>
       ) : null}
 
@@ -104,7 +108,7 @@ export function TemplatesPanel() {
         }}
       >
         <FilePlus2 className="h-4 w-4" />
-        Start from blank
+        {t.blank}
       </Button>
     </div>
   );

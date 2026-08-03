@@ -3,6 +3,7 @@
 import { Field } from "@/components/ui/Field";
 import { ColorInput, Slider } from "@/components/ui/inputs";
 import { cn } from "@/lib/utils/cn";
+import { useT } from "@/components/i18n/I18nProvider";
 import { QR_KINDS, type QrConfig, type QrVcard } from "@/lib/qr/config";
 import type { QrDataKind } from "@/types/element";
 
@@ -19,9 +20,19 @@ interface QrFormProps {
  * properties sidebar (after), so the fields can never drift apart.
  */
 export function QrForm({ value, onChange }: QrFormProps) {
+  const t = useT().editor.qr;
+
   const set = (patch: Partial<QrConfig>) => onChange({ ...value, ...patch });
   const setVcard = (patch: Partial<QrVcard>) =>
     onChange({ ...value, vcard: { ...value.vcard, ...patch } });
+
+  const vcardFields: [keyof QrVcard, string][] = [
+    ["title", t.jobTitle],
+    ["company", t.company],
+    ["phone", t.kinds.phone],
+    ["email", t.kinds.email],
+    ["website", t.website],
+  ];
 
   return (
     <div className="space-y-3">
@@ -31,6 +42,7 @@ export function QrForm({ value, onChange }: QrFormProps) {
             key={kind.id}
             type="button"
             aria-pressed={value.kind === kind.id}
+            data-qr-kind={kind.id}
             onClick={() => set({ kind: kind.id as QrDataKind })}
             className={cn(
               "flex-1 rounded-[6px] px-1 py-1.5 text-[11px] font-medium transition-colors",
@@ -39,13 +51,13 @@ export function QrForm({ value, onChange }: QrFormProps) {
                 : "text-ink-500 hover:text-ink-800",
             )}
           >
-            {kind.label}
+            {t.kinds[kind.id]}
           </button>
         ))}
       </div>
 
       {value.kind === "website" ? (
-        <Field label="URL" stacked>
+        <Field label={t.url} stacked>
           <input
             className={INPUT}
             value={value.website}
@@ -56,7 +68,7 @@ export function QrForm({ value, onChange }: QrFormProps) {
       ) : null}
 
       {value.kind === "phone" ? (
-        <Field label="Phone number" stacked>
+        <Field label={t.phoneNumber} stacked>
           <input
             className={INPUT}
             value={value.phone}
@@ -67,7 +79,7 @@ export function QrForm({ value, onChange }: QrFormProps) {
       ) : null}
 
       {value.kind === "email" ? (
-        <Field label="Email address" stacked>
+        <Field label={t.emailAddress} stacked>
           <input
             className={INPUT}
             type="email"
@@ -81,14 +93,14 @@ export function QrForm({ value, onChange }: QrFormProps) {
       {value.kind === "vcard" ? (
         <div className="space-y-2">
           <div className="flex gap-2">
-            <Field label="First name" stacked>
+            <Field label={t.firstName} stacked>
               <input
                 className={INPUT}
                 value={value.vcard.firstName}
                 onChange={(event) => setVcard({ firstName: event.target.value })}
               />
             </Field>
-            <Field label="Last name" stacked>
+            <Field label={t.lastName} stacked>
               <input
                 className={INPUT}
                 value={value.vcard.lastName}
@@ -96,15 +108,7 @@ export function QrForm({ value, onChange }: QrFormProps) {
               />
             </Field>
           </div>
-          {(
-            [
-              ["title", "Job title"],
-              ["company", "Company"],
-              ["phone", "Phone"],
-              ["email", "Email"],
-              ["website", "Website"],
-            ] as const
-          ).map(([key, label]) => (
+          {vcardFields.map(([key, label]) => (
             <Field key={key} label={label} stacked>
               <input
                 className={INPUT}
@@ -116,14 +120,14 @@ export function QrForm({ value, onChange }: QrFormProps) {
         </div>
       ) : null}
 
-      <Field label="Colour">
+      <Field label={t.colour}>
         <ColorInput
           value={value.darkColor}
           onChange={(color) => set({ darkColor: color })}
         />
       </Field>
 
-      <Field label="Background">
+      <Field label={t.background}>
         <label className="flex items-center gap-2 text-xs text-ink-600">
           <input
             type="checkbox"
@@ -133,12 +137,12 @@ export function QrForm({ value, onChange }: QrFormProps) {
             }
             className="h-4 w-4 accent-brand-600"
           />
-          Transparent
+          {t.transparent}
         </label>
       </Field>
 
       {!value.transparentBackground ? (
-        <Field label="Background colour">
+        <Field label={t.backgroundColour}>
           <ColorInput
             value={value.lightColor}
             onChange={(color) => set({ lightColor: color })}
@@ -146,7 +150,7 @@ export function QrForm({ value, onChange }: QrFormProps) {
         </Field>
       ) : null}
 
-      <Field label="Quiet zone" stacked>
+      <Field label={t.quietZone} stacked>
         <div className="flex items-center gap-2">
           <Slider
             value={value.margin}

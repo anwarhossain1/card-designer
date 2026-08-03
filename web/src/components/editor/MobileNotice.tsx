@@ -4,12 +4,15 @@ import Link from "next/link";
 import { Monitor } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Logo } from "@/components/ui/Logo";
+import { useT } from "@/components/i18n/I18nProvider";
 
 /**
  * Shown instead of the editor on small screens. A cramped canvas with eight
  * panels is worse than an honest message.
  */
 export function MobileNotice() {
+  const t = useT().editor.mobile;
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center gap-6 px-6 text-center">
       <Logo />
@@ -19,18 +22,12 @@ export function MobileNotice() {
       </span>
 
       <div className="max-w-sm">
-        <h1 className="text-xl font-semibold text-ink-900">
-          The editor needs a bigger screen
-        </h1>
-        <p className="mt-3 text-sm leading-relaxed text-ink-600">
-          Business cards are precise work — the canvas, layer list and property
-          controls need a desktop or tablet in landscape. Open CardCraft on a
-          larger screen to start designing.
-        </p>
+        <h1 className="text-xl font-semibold text-ink-900">{t.title}</h1>
+        <p className="mt-3 text-sm leading-relaxed text-ink-600">{t.body}</p>
       </div>
 
       <Link href="/">
-        <Button variant="outline">Back to home</Button>
+        <Button variant="outline">{t.back}</Button>
       </Link>
     </div>
   );

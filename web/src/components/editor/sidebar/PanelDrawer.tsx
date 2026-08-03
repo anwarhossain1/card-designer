@@ -3,6 +3,7 @@
 import { X } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { useUiStore } from "@/store/uiStore";
+import { useT } from "@/components/i18n/I18nProvider";
 import { PANEL_MAP } from "./panelConfig";
 import { TextPanel } from "./panels/TextPanel";
 import { ShapesPanel } from "./panels/ShapesPanel";
@@ -13,11 +14,20 @@ import { BackgroundPanel } from "./panels/BackgroundPanel";
 import { QrPanel } from "./panels/QrPanel";
 import { TemplatesPanel } from "./panels/TemplatesPanel";
 
-/**
- * Drawer beside the rail. Panels are registered here as their features land;
- * the rest state what will live in them.
- */
+const PANEL_CONTENT = {
+  templates: TemplatesPanel,
+  uploads: UploadsPanel,
+  text: TextPanel,
+  shapes: ShapesPanel,
+  icons: IconsPanel,
+  background: BackgroundPanel,
+  qr: QrPanel,
+  layers: LayersPanel,
+} as const;
+
+/** Drawer beside the rail; each tool renders its own panel body. */
 export function PanelDrawer() {
+  const t = useT().editor.panels;
   const activePanel = useUiStore((state) => state.activePanel);
   const closePanel = useUiStore((state) => state.closePanel);
 
@@ -26,11 +36,15 @@ export function PanelDrawer() {
   const panel = PANEL_MAP.get(activePanel);
   if (!panel) return null;
 
-  const { icon: Icon, label, summary } = panel;
+  const { icon: Icon } = panel;
+  const Content = PANEL_CONTENT[activePanel];
+  const label = t[activePanel];
 
   return (
     <aside
-      aria-label={`${label} panel`}
+      aria-label={label}
+      /* Stable hook for tests; the label itself is translated. */
+      data-panel={activePanel}
       className="flex w-72 shrink-0 flex-col border-r border-hairline bg-panel"
     >
       <div className="flex h-12 shrink-0 items-center justify-between gap-2 border-b border-hairline px-3">
@@ -38,33 +52,13 @@ export function PanelDrawer() {
           <Icon className="h-4 w-4 text-ink-500" />
           {label}
         </h2>
-        <IconButton size="sm" label="Close panel" onClick={closePanel}>
+        <IconButton size="sm" label={t.close} onClick={closePanel}>
           <X className="h-4 w-4" />
         </IconButton>
       </div>
 
       <div className="scrollbar-thin flex-1 overflow-y-auto p-3">
-        {activePanel === "templates" ? (
-          <TemplatesPanel />
-        ) : activePanel === "text" ? (
-          <TextPanel />
-        ) : activePanel === "shapes" ? (
-          <ShapesPanel />
-        ) : activePanel === "icons" ? (
-          <IconsPanel />
-        ) : activePanel === "layers" ? (
-          <LayersPanel />
-        ) : activePanel === "uploads" ? (
-          <UploadsPanel />
-        ) : activePanel === "background" ? (
-          <BackgroundPanel />
-        ) : activePanel === "qr" ? (
-          <QrPanel />
-        ) : (
-          <p className="rounded-lg bg-panel-muted p-3 text-sm leading-relaxed text-ink-500">
-            {summary}
-          </p>
-        )}
+        <Content />
       </div>
     </aside>
   );

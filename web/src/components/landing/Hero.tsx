@@ -1,15 +1,18 @@
+"use client";
+
 import Link from "next/link";
 import { ArrowRight, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Container } from "@/components/ui/Container";
+import { useT } from "@/components/i18n/I18nProvider";
 import { CardPreview } from "./card-preview/CardPreview";
 import { CARD_PREVIEWS } from "./card-preview/data";
 
 const [modern, , , , luxury] = CARD_PREVIEWS;
 
-const FACTS = ["3.5 × 2 in", "300 DPI print-ready", "PNG · JPEG · PDF"];
-
 export function Hero() {
+  const t = useT();
+
   return (
     <section className="relative overflow-hidden">
       {/* Soft brand wash — decorative only. */}
@@ -22,39 +25,37 @@ export function Hero() {
         <div>
           <span className="inline-flex items-center gap-1.5 rounded-full border border-brand-100 bg-brand-50 px-3 py-1 text-xs font-medium text-brand-700">
             <Sparkles className="h-3.5 w-3.5" />
-            No sign-up. Nothing to install.
+            {t.landing.hero.badge}
           </span>
 
           <h1 className="mt-5 text-balance text-4xl font-semibold leading-[1.08] tracking-tight text-ink-900 sm:text-5xl lg:text-[3.4rem]">
-            Design a business card you&apos;d actually{" "}
+            {t.landing.hero.titleLead}{" "}
             <span className="bg-gradient-to-r from-brand-600 to-accent-500 bg-clip-text text-transparent">
-              hand out
+              {t.landing.hero.titleAccent}
             </span>
-            .
+            {t.landing.hero.titleEnd}
           </h1>
 
           <p className="mt-5 max-w-xl text-lg leading-relaxed text-ink-600">
-            A focused editor for one job. Start from a template or a blank card,
-            drag things where you want them, and download a print-ready file in
-            seconds.
+            {t.landing.hero.subtitle}
           </p>
 
           <div className="mt-8 flex flex-wrap items-center gap-3">
             <Link href="/editor">
               <Button size="lg" className="group">
-                Start Designing
+                {t.landing.nav.startDesigning}
                 <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
               </Button>
             </Link>
             <a href="#templates">
               <Button size="lg" variant="outline">
-                Browse templates
+                {t.landing.hero.browseTemplates}
               </Button>
             </a>
           </div>
 
           <ul className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-ink-500">
-            {FACTS.map((fact) => (
+            {t.landing.hero.facts.map((fact) => (
               <li key={fact} className="flex items-center gap-2">
                 <span aria-hidden className="h-1.5 w-1.5 rounded-full bg-brand-400" />
                 {fact}

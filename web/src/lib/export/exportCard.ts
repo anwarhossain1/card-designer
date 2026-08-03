@@ -21,11 +21,12 @@ export interface ExportOptions {
   fileName: string;
 }
 
+/** `labelKey` indexes the download dictionary, so presets stay translatable. */
 export const DPI_PRESETS = [
-  { dpi: DESIGN_DPI, label: "Standard (96 DPI)" },
-  { dpi: DESIGN_DPI * 2, label: "Large (192 DPI)" },
-  { dpi: 300, label: "Print (300 DPI)" },
-];
+  { dpi: DESIGN_DPI, labelKey: "dpiStandard" },
+  { dpi: DESIGN_DPI * 2, labelKey: "dpiLarge" },
+  { dpi: 300, labelKey: "dpiPrint" },
+] as const;
 
 const sanitizeFileName = (name: string) =>
   name

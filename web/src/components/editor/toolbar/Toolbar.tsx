@@ -14,13 +14,15 @@ import {
 } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
+import { LocaleToggle } from "@/components/ui/LocaleToggle";
 import { DownloadMenu } from "./DownloadMenu";
 import { useEditorStore } from "@/store/editorStore";
 import { useCanvas } from "../canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 
-/** Top bar. Download stays disabled until the export feature lands. */
 export function Toolbar() {
+  const t = useT().editor.toolbar;
   const documentName = useEditorStore((state) => state.documentName);
   const setDocumentName = useEditorStore((state) => state.setDocumentName);
   const isDirty = useEditorStore((state) => state.isDirty);
@@ -36,7 +38,7 @@ export function Toolbar() {
       <div className="flex min-w-0 items-center gap-2">
         <Link
           href="/"
-          aria-label="Back to home"
+          aria-label={t.back}
           className="inline-flex h-9 items-center gap-1 rounded-md pl-1 pr-2 text-sm text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900"
         >
           <ChevronLeft className="h-4 w-4" />
@@ -51,7 +53,7 @@ export function Toolbar() {
         <input
           value={documentName}
           onChange={(event) => setDocumentName(event.target.value)}
-          aria-label="Design name"
+          aria-label={t.designName}
           spellCheck={false}
           className="h-9 w-52 truncate rounded-md border border-transparent px-2 text-sm font-medium text-ink-800 outline-none transition-colors hover:border-hairline focus:border-brand-400 focus:bg-panel"
         />
@@ -64,12 +66,12 @@ export function Toolbar() {
             {isDirty ? (
               <>
                 <CloudUpload className="h-3.5 w-3.5 animate-pulse" />
-                Saving…
+                {t.saving}
               </>
             ) : (
               <>
                 <Check className="h-3.5 w-3.5" />
-                Saved
+                {t.saved}
               </>
             )}
           </span>
@@ -77,54 +79,43 @@ export function Toolbar() {
       </div>
 
       <div className="flex items-center gap-0.5">
-        <IconButton
-          label="Undo (Ctrl+Z)"
-          disabled={!canUndo}
-          onClick={() => void undo()}
-        >
+        <IconButton label={t.undo} disabled={!canUndo} onClick={() => void undo()}>
           <Undo2 className="h-4 w-4" />
         </IconButton>
-        <IconButton
-          label="Redo (Ctrl+Y)"
-          disabled={!canRedo}
-          onClick={() => void redo()}
-        >
+        <IconButton label={t.redo} disabled={!canRedo} onClick={() => void redo()}>
           <Redo2 className="h-4 w-4" />
         </IconButton>
 
         <span aria-hidden className="mx-1.5 h-5 w-px bg-hairline" />
 
         <IconButton
-          label="Copy (Ctrl+C)"
+          label={t.copy}
           disabled={!hasSelection}
           onClick={() => void copy()}
         >
           <Copy className="h-4 w-4" />
         </IconButton>
         <IconButton
-          label="Paste (Ctrl+V)"
+          label={t.paste}
           disabled={!hasClipboard}
           onClick={() => void paste()}
         >
           <ClipboardPaste className="h-4 w-4" />
         </IconButton>
         <IconButton
-          label="Duplicate (Ctrl+D)"
+          label={t.duplicate}
           disabled={!hasSelection}
           onClick={() => void duplicate()}
         >
           <CopyPlus className="h-4 w-4" />
         </IconButton>
-        <IconButton
-          label="Delete (Del)"
-          disabled={!hasSelection}
-          onClick={remove}
-        >
+        <IconButton label={t.delete} disabled={!hasSelection} onClick={remove}>
           <Trash2 className="h-4 w-4" />
         </IconButton>
       </div>
 
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-1.5">
+        <LocaleToggle compact />
         <ThemeToggle />
         <DownloadMenu />
       </div>

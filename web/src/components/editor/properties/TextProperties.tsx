@@ -21,29 +21,25 @@ import {
 } from "@/components/ui/inputs";
 import { FONTS } from "@/config/fonts";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 
 const FONT_OPTIONS = FONTS.map((font) => ({
   value: font.family,
   label: font.label,
 }));
 
-const ALIGN_OPTIONS = [
-  { value: "left", label: "Align left", icon: <AlignLeft className="h-4 w-4" /> },
-  { value: "center", label: "Align centre", icon: <AlignCenter className="h-4 w-4" /> },
-  { value: "right", label: "Align right", icon: <AlignRight className="h-4 w-4" /> },
-  { value: "justify", label: "Justify", icon: <AlignJustify className="h-4 w-4" /> },
-] as const;
-
-const WEIGHT_LABELS: Record<number, string> = {
-  300: "Light",
-  400: "Regular",
-  500: "Medium",
-  600: "Semibold",
-  700: "Bold",
-};
+type Align = "left" | "center" | "right" | "justify";
 
 export function TextProperties({ target }: { target: Textbox }) {
+  const t = useT().editor.properties;
   const { update, updateFontFamily } = useCanvasActions();
+
+  const alignOptions: { value: Align; label: string; icon: React.ReactNode }[] = [
+    { value: "left", label: t.alignLeft, icon: <AlignLeft className="h-4 w-4" /> },
+    { value: "center", label: t.alignCentre, icon: <AlignCenter className="h-4 w-4" /> },
+    { value: "right", label: t.alignRight, icon: <AlignRight className="h-4 w-4" /> },
+    { value: "justify", label: t.justify, icon: <AlignJustify className="h-4 w-4" /> },
+  ];
 
   const family = target.fontFamily ?? "Inter";
   const weights = FONTS.find((font) => font.family === family)?.weights ?? [400];
@@ -52,10 +48,10 @@ export function TextProperties({ target }: { target: Textbox }) {
 
   return (
     <>
-      <FieldGroup title="Font">
-        <Field label="Family" stacked>
+      <FieldGroup title={t.font}>
+        <Field label={t.family} stacked>
           <Select
-            ariaLabel="Font family"
+            ariaLabel={t.family}
             value={family}
             options={FONT_OPTIONS}
             onChange={(value) => void updateFontFamily(value)}
@@ -63,7 +59,7 @@ export function TextProperties({ target }: { target: Textbox }) {
         </Field>
 
         <div className="flex items-end gap-2">
-          <Field label="Size" stacked className="w-20">
+          <Field label={t.size} stacked className="w-20">
             <NumberInput
               value={target.fontSize ?? 12}
               min={4}
@@ -71,24 +67,24 @@ export function TextProperties({ target }: { target: Textbox }) {
               onChange={(value) => update({ fontSize: value })}
             />
           </Field>
-          <Field label="Weight" stacked className="flex-1">
+          <Field label={t.weight} stacked className="flex-1">
             <Select
-              ariaLabel="Font weight"
+              ariaLabel={t.weight}
               value={weight}
               options={weights.map((option) => ({
                 value: option,
-                label: WEIGHT_LABELS[option] ?? String(option),
+                label: t.weights[option] ?? String(option),
               }))}
               onChange={(value) => update({ fontWeight: Number(value) })}
             />
           </Field>
         </div>
 
-        <Field label="Style">
+        <Field label={t.style}>
           <div className="flex items-center gap-0.5">
             <IconButton
               size="sm"
-              label="Bold"
+              label={t.bold}
               active={weight >= 600}
               onClick={() => update({ fontWeight: weight >= 600 ? 400 : 700 })}
             >
@@ -96,7 +92,7 @@ export function TextProperties({ target }: { target: Textbox }) {
             </IconButton>
             <IconButton
               size="sm"
-              label="Italic"
+              label={t.italic}
               active={target.fontStyle === "italic"}
               onClick={() =>
                 update({
@@ -108,7 +104,7 @@ export function TextProperties({ target }: { target: Textbox }) {
             </IconButton>
             <IconButton
               size="sm"
-              label="Underline"
+              label={t.underline}
               active={Boolean(target.underline)}
               onClick={() => update({ underline: !target.underline })}
             >
@@ -117,18 +113,18 @@ export function TextProperties({ target }: { target: Textbox }) {
           </div>
         </Field>
 
-        <Field label="Alignment" stacked>
+        <Field label={t.alignment} stacked>
           <SegmentedControl
-            ariaLabel="Text alignment"
-            value={(target.textAlign as (typeof ALIGN_OPTIONS)[number]["value"]) ?? "left"}
-            options={[...ALIGN_OPTIONS]}
+            ariaLabel={t.alignment}
+            value={(target.textAlign as Align) ?? "left"}
+            options={alignOptions}
             onChange={(value) => update({ textAlign: value })}
           />
         </Field>
       </FieldGroup>
 
-      <FieldGroup title="Spacing">
-        <Field label="Letter spacing" stacked>
+      <FieldGroup title={t.spacing}>
+        <Field label={t.letterSpacing} stacked>
           <div className="flex items-center gap-2">
             <Slider
               value={target.charSpacing ?? 0}
@@ -143,7 +139,7 @@ export function TextProperties({ target }: { target: Textbox }) {
           </div>
         </Field>
 
-        <Field label="Line height" stacked>
+        <Field label={t.lineHeight} stacked>
           <div className="flex items-center gap-2">
             <Slider
               value={target.lineHeight ?? 1.16}
@@ -159,9 +155,9 @@ export function TextProperties({ target }: { target: Textbox }) {
         </Field>
       </FieldGroup>
 
-      <FieldGroup title="Appearance">
+      <FieldGroup title={t.appearance}>
         {/* Opacity and rotation live in the shared Arrange section. */}
-        <Field label="Colour">
+        <Field label={t.colour}>
           <ColorInput value={fill} onChange={(value) => update({ fill: value })} />
         </Field>
       </FieldGroup>

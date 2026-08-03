@@ -1,8 +1,8 @@
 "use client";
 
 import type { ShapeVariant } from "@/types/element";
-import { SHAPE_LABELS } from "@/lib/canvas/elements/shape";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 
 /** Preview markup mirrors what `createShapeElement` produces. */
 const PREVIEWS: Record<ShapeVariant, React.ReactNode> = {
@@ -22,6 +22,7 @@ const ORDER: ShapeVariant[] = [
 ];
 
 export function ShapesPanel() {
+  const t = useT().editor.shapes;
   const { addShape } = useCanvasActions();
 
   return (
@@ -30,8 +31,9 @@ export function ShapesPanel() {
         <li key={variant}>
           <button
             type="button"
-            title={SHAPE_LABELS[variant]}
-            aria-label={SHAPE_LABELS[variant]}
+            title={t[variant]}
+            aria-label={t[variant]}
+            data-shape={variant}
             onClick={() => addShape(variant)}
             className="grid aspect-square w-full place-items-center rounded-lg border border-hairline bg-panel text-ink-700 transition-colors hover:border-brand-200 hover:bg-brand-50 hover:text-brand-700 focus-visible:outline-2 focus-visible:outline-brand-400"
           >

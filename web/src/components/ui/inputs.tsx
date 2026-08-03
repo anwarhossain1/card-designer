@@ -89,9 +89,12 @@ export function Slider({
 export function ColorInput({
   value,
   onChange,
+  ariaLabel,
 }: {
   value: string;
   onChange: (value: string) => void;
+  /** Falls back to the surrounding <Field> label when omitted. */
+  ariaLabel?: string;
 }) {
   return (
     <label className="flex items-center gap-2">
@@ -100,7 +103,7 @@ export function ColorInput({
           type="color"
           value={normalizeHex(value)}
           onChange={(event) => onChange(event.target.value)}
-          aria-label="Colour"
+          aria-label={ariaLabel}
           className="absolute -inset-2 h-[calc(100%+1rem)] w-[calc(100%+1rem)] cursor-pointer border-0 bg-transparent p-0"
         />
       </span>

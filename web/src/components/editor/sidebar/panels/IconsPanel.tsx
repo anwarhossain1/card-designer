@@ -2,11 +2,9 @@
 
 import { ICONS, type IconDefinition, type IconGroup } from "@/lib/icons/registry";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
+import { useT } from "@/components/i18n/I18nProvider";
 
-const GROUPS: { id: IconGroup; title: string }[] = [
-  { id: "contact", title: "Contact" },
-  { id: "social", title: "Social" },
-];
+const GROUP_ORDER: IconGroup[] = ["contact", "social"];
 
 function IconButton({ icon }: { icon: IconDefinition }) {
   const { addIcon } = useCanvasActions();
@@ -36,15 +34,17 @@ function IconButton({ icon }: { icon: IconDefinition }) {
 }
 
 export function IconsPanel() {
+  const t = useT().editor.icons;
+
   return (
     <div className="space-y-4">
-      {GROUPS.map((group) => (
-        <section key={group.id}>
+      {GROUP_ORDER.map((group) => (
+        <section key={group}>
           <h3 className="mb-2 text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-400">
-            {group.title}
+            {t[group]}
           </h3>
           <ul className="grid grid-cols-3 gap-2">
-            {ICONS.filter((icon) => icon.group === group.id).map((icon) => (
+            {ICONS.filter((icon) => icon.group === group).map((icon) => (
               <li key={icon.id}>
                 <IconButton icon={icon} />
               </li>
