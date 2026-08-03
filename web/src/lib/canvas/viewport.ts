@@ -1,4 +1,4 @@
-import { Point, type Canvas, type TMat2D } from "fabric";
+import { Point, type Canvas, type FabricObject, type TMat2D } from "fabric";
 import { CANVAS_HEIGHT, CANVAS_WIDTH, ZOOM } from "@/config/document";
 import { clamp } from "@/lib/utils/units";
 
@@ -91,6 +91,32 @@ export function preserveCenterOnResize(
   vpt[4] += (next.width - previous.width) / 2;
   vpt[5] += (next.height - previous.height) / 2;
   canvas.setViewportTransform(vpt);
+}
+
+/**
+ * Centres one object in the workspace.
+ *
+ * Used when the on-screen keyboard shrinks the viewport mid-edit: holding the
+ * transform still would leave the text being typed hidden behind the keyboard,
+ * so the view follows the caret instead.
+ */
+export function centreObjectInView(
+  canvas: Canvas,
+  object: FabricObject,
+  container: Size,
+) {
+  const zoom = canvas.getZoom();
+  const centre = object.getCenterPoint();
+
+  canvas.setViewportTransform([
+    zoom,
+    0,
+    0,
+    zoom,
+    container.width / 2 - centre.x * zoom,
+    container.height / 2 - centre.y * zoom,
+  ]);
+  canvas.requestRenderAll();
 }
 
 /** How much of the card must stay on screen, in pixels. */

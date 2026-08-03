@@ -39,7 +39,8 @@ export function CanvasStage({ isCompact = false }: { isCompact?: boolean }) {
       <div
         ref={containerRef}
         data-canvas-layers
-        className="relative flex-1 overflow-hidden"
+        /* touch-none: the page must not pan or zoom under our own gestures. */
+        className="relative flex-1 touch-none overflow-hidden"
         onDragOver={(event) => {
           if (!event.dataTransfer.types.includes("Files")) return;
           event.preventDefault();

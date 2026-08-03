@@ -5,6 +5,7 @@ import { Point, type Canvas, type TPointerEvent } from "fabric";
 import { ZOOM } from "@/config/document";
 import { createArtworkCanvas } from "@/lib/canvas/setup";
 import {
+  centreObjectInView,
   clampViewportToCard,
   clampZoom,
   fitToScreen as fitCanvasToScreen,
@@ -14,6 +15,7 @@ import {
   zoomTo,
 } from "@/lib/canvas/viewport";
 import { drawGuides, drawPaper, resizeLayer } from "@/lib/canvas/overlay";
+import { attachTouchGestures } from "@/lib/canvas/gestures";
 import { useUiStore } from "@/store/uiStore";
 
 /**
@@ -161,10 +163,27 @@ export function useEditorCanvas() {
         };
         if (next.width === 0 || next.height === 0) return;
 
-        preserveCenterOnResize(canvas, sizeRef.current, next);
+        /*
+         * The mobile keyboard resizes the viewport mid-edit. Recentring the
+         * card would push the text being typed behind the keyboard, so follow
+         * the edited element instead; every other resize keeps the card put.
+         */
+        const active = canvas.getActiveObject();
+        const isEditing = Boolean(
+          active && "isEditing" in active && active.isEditing,
+        );
+
+        const previous = sizeRef.current;
         sizeRef.current = next;
         canvas.setDimensions(next);
-        clampViewportToCard(canvas, next);
+
+        if (isEditing && active) {
+          centreObjectInView(canvas, active, next);
+        } else {
+          preserveCenterOnResize(canvas, previous, next);
+          clampViewportToCard(canvas, next);
+        }
+
         syncLayers(next);
       });
       observer.observe(container);
@@ -268,6 +287,22 @@ export function useEditorCanvas() {
     container.addEventListener("wheel", onWheel, { passive: false });
     return () => container.removeEventListener("wheel", onWheel);
   }, [isReady]);
+
+  /* ------------------------------------------------------- touch gestures */
+
+  useEffect(() => {
+    const container = containerRef.current;
+    const canvas = canvasRef.current;
+    if (!container || !canvas || !isReady) return;
+
+    return attachTouchGestures({
+      container,
+      canvas,
+      onZoom: setZoomState,
+      onFit: fitToScreen,
+      getSize: () => sizeRef.current,
+    });
+  }, [isReady, fitToScreen]);
 
   /* -------------------------------------------------------- space-to-pan key */
 

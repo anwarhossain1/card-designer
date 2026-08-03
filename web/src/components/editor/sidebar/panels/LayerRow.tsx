@@ -1,6 +1,5 @@
 "use client";
 
-import type { DragEvent } from "react";
 import {
   CopyPlus,
   Eye,
@@ -37,15 +36,13 @@ export interface LayerRowProps {
   position: number;
   isSelected: boolean;
   isDropTarget: boolean;
+  isDragging: boolean;
   onSelect: (id: string) => void;
   onToggleLock: (id: string) => void;
   onToggleVisibility: (id: string) => void;
   onDuplicate: (id: string) => void;
   onDelete: (id: string) => void;
-  onDragStart: (position: number) => void;
-  onDragOver: (event: DragEvent, position: number) => void;
-  onDrop: (position: number) => void;
-  onDragEnd: () => void;
+  onDragStart: (position: number, event: React.PointerEvent) => void;
 }
 
 export function LayerRow({
@@ -53,36 +50,38 @@ export function LayerRow({
   position,
   isSelected,
   isDropTarget,
+  isDragging,
   onSelect,
   onToggleLock,
   onToggleVisibility,
   onDuplicate,
   onDelete,
   onDragStart,
-  onDragOver,
-  onDrop,
-  onDragEnd,
 }: LayerRowProps) {
   const t = useT().editor.layers;
   const Icon = KIND_ICON[layer.kind];
 
   return (
     <li
-      draggable
-      onDragStart={() => onDragStart(position)}
-      onDragOver={(event) => onDragOver(event, position)}
-      onDrop={() => onDrop(position)}
-      onDragEnd={onDragEnd}
+      data-layer-index={position}
       className={cn(
         "group flex items-center gap-1 rounded-lg border px-1.5 py-1.5 transition-colors",
         isSelected
           ? "border-brand-200 bg-brand-50"
           : "border-transparent hover:bg-ink-50",
-        isDropTarget && "border-brand-400 border-dashed",
+        isDropTarget && "border-dashed border-brand-400",
+        isDragging && "opacity-60",
         !layer.visible && "opacity-55",
       )}
     >
-      <GripVertical className="h-4 w-4 shrink-0 cursor-grab text-ink-300" />
+      {/* touch-none so dragging the grip never scrolls the sheet instead. */}
+      <span
+        onPointerDown={(event) => onDragStart(position, event)}
+        aria-hidden
+        className="grid h-8 w-6 shrink-0 cursor-grab touch-none place-items-center text-ink-300 coarse:h-10 coarse:w-8"
+      >
+        <GripVertical className="h-4 w-4" />
+      </span>
 
       <button
         type="button"

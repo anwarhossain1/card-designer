@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type DragEvent } from "react";
+import { useLayerDrag } from "@/hooks/useLayerDrag";
 import {
   ArrowDown,
   ArrowDownToLine,
@@ -42,29 +42,9 @@ export function LayersPanel() {
     deleteLayer,
   } = useLayers();
 
-  /*
-   * The drag origin lives in a ref, not state: dragstart and drop can land in
-   * the same commit, and a state value would still read null on drop.
-   */
-  const dragFrom = useRef<number | null>(null);
-  const [dragOver, setDragOver] = useState<number | null>(null);
+  const { fromIndex, overIndex, startDrag } = useLayerDrag(reorder);
 
   const activeId = layers.find((layer) => selectedIds.has(layer.id))?.id ?? null;
-
-  const handleDragOver = (event: DragEvent, position: number) => {
-    event.preventDefault();
-    setDragOver(position);
-  };
-
-  const endDrag = () => {
-    dragFrom.current = null;
-    setDragOver(null);
-  };
-
-  const handleDrop = (position: number) => {
-    if (dragFrom.current !== null) reorder(dragFrom.current, position);
-    endDrag();
-  };
 
   if (layers.length === 0) {
     return (
@@ -101,18 +81,14 @@ export function LayersPanel() {
             layer={layer}
             position={position}
             isSelected={selectedIds.has(layer.id)}
-            isDropTarget={dragOver === position && dragFrom.current !== position}
+            isDropTarget={overIndex === position && fromIndex !== position}
+            isDragging={fromIndex === position}
             onSelect={select}
             onToggleLock={toggleLock}
             onToggleVisibility={toggleVisibility}
             onDuplicate={(id) => void duplicateLayer(id)}
             onDelete={deleteLayer}
-            onDragStart={(origin) => {
-              dragFrom.current = origin;
-            }}
-            onDragOver={handleDragOver}
-            onDrop={handleDrop}
-            onDragEnd={endDrag}
+            onDragStart={startDrag}
           />
         ))}
       </ul>
