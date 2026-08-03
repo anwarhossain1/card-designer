@@ -21,24 +21,16 @@ import { createQrElement, updateQrElement } from "@/lib/canvas/elements/qr";
 import type { QrConfig } from "@/lib/qr/config";
 import type { FabricObject } from "fabric";
 import {
-  clearBackground,
-  setGradientBackground,
-  setImageBackground,
-  setPatternBackground,
-  setSolidBackground,
+  applyBackground,
+  type BackgroundSpec,
 } from "@/lib/canvas/elements/background";
+import { applyTemplate } from "@/lib/templates/apply";
+import type { CardTemplate } from "@/types/template";
 import { loadFont } from "@/lib/fonts/loader";
 import { DEFAULT_FONT_FAMILY } from "@/config/fonts";
 import type { UploadedAsset } from "@/lib/uploads/readFile";
-import type { PatternId } from "@/lib/canvas/patterns";
 import type { ShapeVariant, TextVariant } from "@/types/element";
-
-export type BackgroundRequest =
-  | { kind: "none" }
-  | { kind: "solid"; color: string }
-  | { kind: "gradient"; from: string; to: string; angle: number }
-  | { kind: "image"; dataUrl: string }
-  | { kind: "pattern"; id: PatternId; background: string; foreground: string };
+import { useEditorStore } from "@/store/editorStore";
 
 /**
  * Element operations bound to the live canvas. Components call these instead of
@@ -46,6 +38,7 @@ export type BackgroundRequest =
  */
 export function useCanvasActions() {
   const { canvasRef, refresh } = useCanvas();
+  const setTemplateId = useEditorStore((state) => state.setTemplateId);
 
   const addText = useCallback(
     async (variant: TextVariant) => {
@@ -129,32 +122,27 @@ export function useCanvasActions() {
   );
 
   const setBackground = useCallback(
-    async (request: BackgroundRequest) => {
+    async (spec: BackgroundSpec) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
 
-      switch (request.kind) {
-        case "none":
-          clearBackground(canvas);
-          canvas.requestRenderAll();
-          break;
-        case "solid":
-          setSolidBackground(canvas, request.color);
-          break;
-        case "gradient":
-          setGradientBackground(canvas, request);
-          break;
-        case "pattern":
-          setPatternBackground(canvas, request);
-          break;
-        case "image":
-          await setImageBackground(canvas, request.dataUrl);
-          break;
-      }
-
+      await applyBackground(canvas, spec);
       refresh();
     },
     [canvasRef, refresh],
+  );
+
+  /* Named `selectTemplate`, not `useTemplate` — a use* action reads as a hook. */
+  const selectTemplate = useCallback(
+    async (template: CardTemplate) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      await applyTemplate(canvas, template);
+      setTemplateId(template.id);
+      refresh();
+    },
+    [canvasRef, refresh, setTemplateId],
   );
 
   /** Icons are stroke-drawn groups, so style changes walk their parts. */
@@ -244,6 +232,7 @@ export function useCanvasActions() {
     addQr,
     updateQr,
     setBackground,
+    selectTemplate,
     setIconStyle,
     update,
     updateFontFamily,

@@ -3,14 +3,22 @@ import {
   Gradient,
   Pattern,
   Rect,
-  type Canvas,
   type FabricObject,
+  type StaticCanvas,
 } from "fabric";
 import { CANVAS_HEIGHT, CANVAS_WIDTH } from "@/config/document";
 import { createPatternTile, type PatternId } from "../patterns";
 import { attachMeta, createMeta, getMeta } from "../meta";
 
 export type BackgroundKind = "none" | "solid" | "gradient" | "image" | "pattern";
+
+/** Declarative backdrop request, shared by the panel, templates and actions. */
+export type BackgroundSpec =
+  | { kind: "none" }
+  | { kind: "solid"; color: string }
+  | { kind: "gradient"; from: string; to: string; angle: number }
+  | { kind: "image"; dataUrl: string }
+  | { kind: "pattern"; id: PatternId; background: string; foreground: string };
 
 export interface GradientOptions {
   from: string;
@@ -44,14 +52,14 @@ function baseProps() {
   };
 }
 
-export function getBackground(canvas: Canvas): FabricObject | null {
+export function getBackground(canvas: StaticCanvas): FabricObject | null {
   return (
     canvas.getObjects().find((object) => getMeta(object)?.kind === "background") ??
     null
   );
 }
 
-function mount(canvas: Canvas, object: FabricObject, name: string) {
+function mount(canvas: StaticCanvas, object: FabricObject, name: string) {
   clearBackground(canvas);
 
   attachMeta(
@@ -65,17 +73,17 @@ function mount(canvas: Canvas, object: FabricObject, name: string) {
   return object;
 }
 
-export function clearBackground(canvas: Canvas) {
+export function clearBackground(canvas: StaticCanvas) {
   const existing = getBackground(canvas);
   if (existing) canvas.remove(existing);
 }
 
-export function setSolidBackground(canvas: Canvas, color: string) {
+export function setSolidBackground(canvas: StaticCanvas, color: string) {
   return mount(canvas, new Rect({ ...baseProps(), fill: color }), "Background");
 }
 
 export function setGradientBackground(
-  canvas: Canvas,
+  canvas: StaticCanvas,
   { from, to, angle }: GradientOptions,
 ) {
   const radians = (angle * Math.PI) / 180;
@@ -112,7 +120,7 @@ export function setGradientBackground(
 }
 
 export function setPatternBackground(
-  canvas: Canvas,
+  canvas: StaticCanvas,
   { id, background, foreground }: PatternOptions,
 ) {
   const pattern = new Pattern({
@@ -127,8 +135,29 @@ export function setPatternBackground(
   );
 }
 
+/** Applies any backdrop spec; the one entry point templates and panels share. */
+export async function applyBackground(canvas: StaticCanvas, spec: BackgroundSpec) {
+  switch (spec.kind) {
+    case "none":
+      clearBackground(canvas);
+      canvas.requestRenderAll();
+      return;
+    case "solid":
+      setSolidBackground(canvas, spec.color);
+      return;
+    case "gradient":
+      setGradientBackground(canvas, spec);
+      return;
+    case "pattern":
+      setPatternBackground(canvas, spec);
+      return;
+    case "image":
+      await setImageBackground(canvas, spec.dataUrl);
+  }
+}
+
 /** Scales the image to cover the card, centred — never letterboxed. */
-export async function setImageBackground(canvas: Canvas, dataUrl: string) {
+export async function setImageBackground(canvas: StaticCanvas, dataUrl: string) {
   const image = await FabricImage.fromURL(dataUrl);
   const scale = Math.max(
     CANVAS_WIDTH / (image.width || 1),

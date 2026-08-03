@@ -11,6 +11,7 @@ import { LayersPanel } from "./panels/LayersPanel";
 import { UploadsPanel } from "./panels/UploadsPanel";
 import { BackgroundPanel } from "./panels/BackgroundPanel";
 import { QrPanel } from "./panels/QrPanel";
+import { TemplatesPanel } from "./panels/TemplatesPanel";
 
 /**
  * Drawer beside the rail. Panels are registered here as their features land;
@@ -43,7 +44,9 @@ export function PanelDrawer() {
       </div>
 
       <div className="scrollbar-thin flex-1 overflow-y-auto p-3">
-        {activePanel === "text" ? (
+        {activePanel === "templates" ? (
+          <TemplatesPanel />
+        ) : activePanel === "text" ? (
           <TextPanel />
         ) : activePanel === "shapes" ? (
           <ShapesPanel />

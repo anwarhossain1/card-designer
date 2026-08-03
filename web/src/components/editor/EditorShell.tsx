@@ -2,7 +2,8 @@
 
 import { useIsSmallScreen } from "@/hooks/useMediaQuery";
 import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
-import { CanvasProvider } from "./canvas/CanvasProvider";
+import { useTemplateDeepLink } from "@/hooks/useTemplateDeepLink";
+import { CanvasProvider, useCanvas } from "./canvas/CanvasProvider";
 import { CanvasStage } from "./canvas/CanvasStage";
 import { MobileNotice } from "./MobileNotice";
 import { PropertiesPanel } from "./properties/PropertiesPanel";
@@ -29,7 +30,9 @@ export function EditorShell() {
 
 /** Inside the provider so the chrome and shortcuts can reach the canvas. */
 function EditorLayout() {
+  const { canvasRef, isHydrated } = useCanvas();
   useKeyboardShortcuts();
+  useTemplateDeepLink(canvasRef, isHydrated);
 
   return (
     <div data-editor-root className="flex h-screen flex-col overflow-hidden">

@@ -1,4 +1,5 @@
-import type { DocumentSize, SceneJSON } from "./document";
+import type { FabricObject } from "fabric";
+import type { BackgroundSpec } from "@/lib/canvas/elements/background";
 
 export type TemplateCategory =
   | "modern"
@@ -11,16 +12,23 @@ export interface TemplateSummary {
   id: string;
   name: string;
   category: TemplateCategory;
-  /** Dominant colours, used for the template card preview strip. */
+  description: string;
+  /** Dominant colours, used while a real preview renders. */
   palette: string[];
-  tags: string[];
+  /** Families the layout depends on; loaded before any text is measured. */
+  fonts: string[];
+}
+
+export interface TemplateScene {
+  background: BackgroundSpec;
+  /** Bottom-most first, already positioned in card coordinates. */
+  objects: FabricObject[];
 }
 
 export interface CardTemplate extends TemplateSummary {
-  size: DocumentSize;
   /**
-   * Built lazily so template modules stay small and fonts/images are only
-   * resolved when a template is actually applied.
+   * Builds fresh Fabric objects on every call — objects belong to one canvas
+   * at a time, so previews and the editor cannot share instances.
    */
-  build: () => SceneJSON;
+  build: () => TemplateScene;
 }
