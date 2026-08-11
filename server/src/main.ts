@@ -1,6 +1,7 @@
 import { Logger } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import type { NestExpressApplication } from "@nestjs/platform-express";
+import cookieParser from "cookie-parser";
 import helmet from "helmet";
 import morgan from "morgan";
 import { AppModule } from "./app.module";
@@ -13,8 +14,12 @@ async function bootstrap() {
 
   app.use(helmet());
   app.use(morgan(isProduction ? "combined" : "dev"));
+  app.use(cookieParser());
+
   app.enableCors({
     origin: env.CORS_ORIGIN.split(",").map((value) => value.trim()),
+    // Sessions are cookies, so the browser needs permission to send them.
+    credentials: true,
   });
 
   // Scenes carry inlined images, so allow generous payloads.

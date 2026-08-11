@@ -6,9 +6,17 @@ const schema = z.object({
     .enum(["development", "test", "production"])
     .default("development"),
   PORT: z.coerce.number().int().positive().default(4000),
-  /** Optional: the API serves bundled data when Mongo is unavailable. */
-  MONGODB_URI: z.string().optional(),
+  /** Required since accounts landed — sessions and users need persistence. */
+  MONGODB_URI: z.string().min(1),
   CORS_ORIGIN: z.string().default("http://localhost:3000"),
+  /*
+   * Separate secrets, so a leaked access secret cannot mint refresh tokens.
+   * 32 chars is the floor for HS256 to be worth the name.
+   */
+  ACCESS_TOKEN_SECRET: z.string().min(32),
+  REFRESH_TOKEN_SECRET: z.string().min(32),
+  ACCESS_TOKEN_TTL: z.string().default("15m"),
+  REFRESH_TOKEN_TTL: z.string().default("7d"),
 });
 
 const parsed = schema.safeParse(process.env);
@@ -21,8 +29,7 @@ if (!parsed.success) {
 /**
  * Validated eagerly at import rather than through ConfigModule.
  *
- * Whether Mongo is configured decides which modules are imported at all, and
- * a module's `imports` array is evaluated when its decorator runs — before any
+ * Module `imports` arrays are evaluated when the decorator runs — before any
  * provider, ConfigService included, could have been resolved. Reading a
  * validated constant sidesteps that ordering entirely.
  */

@@ -1,5 +1,6 @@
 import { Controller, Get, Param, Query } from "@nestjs/common";
 import { z } from "zod";
+import { Public } from "../../common/decorators/public.decorator";
 import { ZodValidationPipe } from "../../common/zod-validation.pipe";
 import { TEMPLATE_CATEGORIES } from "./template.schema";
 import { TemplatesService } from "./templates.service";
@@ -13,6 +14,8 @@ type ListQuery = z.infer<typeof listQuerySchema>;
 
 const slugSchema = z.string().min(1);
 
+/** The catalogue is public — browsing templates never required an account. */
+@Public()
 @Controller("templates")
 export class TemplatesController {
   constructor(private readonly templates: TemplatesService) {}

@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException, Optional } from "@nestjs/common";
+import { Injectable, NotFoundException } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import type { Model } from "mongoose";
 import { Template, type TemplateDocument } from "./template.schema";
@@ -9,23 +9,17 @@ export interface ListTemplatesQuery {
 }
 
 /**
- * The MVP ships its template catalogue with the client bundle, so these calls
- * return an empty catalogue when no database is configured instead of failing.
- *
- * The model is optional for that reason: with no MONGODB_URI the Mongoose
- * module is never imported, so there is nothing to inject.
+ * The catalogue still ships with the client bundle, so an empty collection
+ * here is a normal state rather than a fault.
  */
 @Injectable()
 export class TemplatesService {
   constructor(
-    @Optional()
     @InjectModel(Template.name)
-    private readonly templates?: Model<TemplateDocument>,
+    private readonly templates: Model<TemplateDocument>,
   ) {}
 
-  async list(query: ListTemplatesQuery) {
-    if (!this.templates) return [];
-
+  list(query: ListTemplatesQuery) {
     const filter: Record<string, unknown> = { published: true };
     if (query.category) filter.category = query.category;
     if (query.search) filter.$text = { $search: query.search };
@@ -35,7 +29,7 @@ export class TemplatesService {
 
   async findBySlug(slug: string) {
     const template = await this.templates
-      ?.findOne({ slug, published: true })
+      .findOne({ slug, published: true })
       .lean();
 
     if (!template) throw new NotFoundException("Template not found");
