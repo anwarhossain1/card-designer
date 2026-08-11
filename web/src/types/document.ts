@@ -19,9 +19,11 @@ export interface DocumentSize {
 /** Serialized Fabric scene. Kept opaque so canvas internals stay in lib/canvas. */
 export type SceneJSON = Record<string, unknown>;
 
+export type SideId = "front" | "back";
+
 export interface CardSide {
-  /** Reserved: "back" is not implemented in the MVP but the shape allows it. */
-  id: "front" | "back";
+  id: SideId;
+  /** null until the side has been drawn on; a blank side prints as bare paper. */
   scene: SceneJSON | null;
 }
 
@@ -37,6 +39,7 @@ export interface CardDocument {
   safeArea: number;
   /** Template the document was created from, if any. */
   templateId: string | null;
+  /** Always front then back, in that order — see lib/document/sides. */
   sides: CardSide[];
   createdAt: string;
   updatedAt: string;

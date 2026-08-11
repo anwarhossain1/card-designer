@@ -42,6 +42,11 @@ export const editor: Dictionary["editor"] = {
     dropHere: "কার্ডে যোগ করতে ছেড়ে দিন",
     loading: "এডিটর লোড হচ্ছে…",
   },
+  sides: {
+    label: "কার্ডের দিক",
+    front: "সামনে",
+    back: "পিছনে",
+  },
   templates: {
     replaceWarning:
       "টেমপ্লেট বসালে কার্ডে যা আছে তা বদলে যাবে। আন্ডু করলে ডিজাইন ফিরে আসবে।",
@@ -201,6 +206,13 @@ export const editor: Dictionary["editor"] = {
     png: { label: "PNG", hint: "ঝকঝকে, স্বচ্ছতা সমর্থন করে" },
     jpeg: { label: "JPEG", hint: "ছোট ফাইল, একরঙা ব্যাকগ্রাউন্ড" },
     pdf: { label: "PDF", hint: "প্রিন্ট-রেডি, ৩০০ DPI" },
+    scope: "কোন দিক",
+    scopes: {
+      front: "শুধু সামনের দিক",
+      back: "শুধু পিছনের দিক",
+      both: "দুই দিকই",
+    },
+    backEmpty: "পিছনের দিক এখনো খালি — এটি সাদা কার্ড হয়েই আসবে।",
     quality: "মান",
     resolution: "এক্সপোর্ট রেজল্যুশন",
     dpiStandard: "সাধারণ (৯৬ DPI)",

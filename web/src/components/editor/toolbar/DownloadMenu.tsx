@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Download, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Field } from "@/components/ui/Field";
@@ -9,27 +9,44 @@ import { cn } from "@/lib/utils/cn";
 import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useT } from "@/components/i18n/I18nProvider";
 import { useEditorStore } from "@/store/editorStore";
-import { serializeScene } from "@/lib/canvas/persistence";
+import { getSideScene, isSceneEmpty } from "@/lib/document/sides";
 import {
   DPI_PRESETS,
   exportCard,
+  selectSides,
   type ExportFormat,
+  type ExportScope,
 } from "@/lib/export/exportCard";
 
 const FORMATS: ExportFormat[] = ["png", "jpeg", "pdf"];
+const SCOPES: ExportScope[] = ["front", "back", "both"];
 
 export function DownloadMenu() {
   const dictionary = useT().editor;
   const t = dictionary.download;
-  const { canvasRef } = useCanvas();
+  const { canvasRef, collectSides } = useCanvas();
   const documentName = useEditorStore((state) => state.documentName);
 
   const [isOpen, setIsOpen] = useState(false);
   const [format, setFormat] = useState<ExportFormat>("png");
+  const [scope, setScope] = useState<ExportScope>("front");
+  const [isBackEmpty, setIsBackEmpty] = useState(true);
   const [dpi, setDpi] = useState(300);
   const [transparent, setTransparent] = useState(false);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  /*
+   * Opening the menu is the moment to ask what the card actually contains.
+   * Offering "both sides" by default on a card whose back is still blank would
+   * hand the user a second, empty file they never asked for.
+   */
+  useEffect(() => {
+    if (!isOpen) return;
+    const backIsEmpty = isSceneEmpty(getSideScene(collectSides(), "back"));
+    setIsBackEmpty(backIsEmpty);
+    setScope(backIsEmpty ? "front" : "both");
+  }, [isOpen, collectSides]);
 
   const download = async () => {
     const canvas = canvasRef.current;
@@ -38,7 +55,9 @@ export function DownloadMenu() {
     setIsBusy(true);
     setError(null);
     try {
-      await exportCard(serializeScene(canvas), {
+      // Collected fresh rather than reused from open: the live canvas holds
+      // whichever side is showing, and only collectSides knows the other one.
+      await exportCard(selectSides(collectSides(), scope), {
         format,
         dpi,
         transparent,
@@ -99,6 +118,22 @@ export function DownloadMenu() {
             </div>
 
             <div className="mt-3 space-y-3">
+              <Field label={t.scope} stacked>
+                <Select
+                  ariaLabel={t.scope}
+                  value={scope}
+                  options={SCOPES.map((entry) => ({
+                    value: entry,
+                    label: t.scopes[entry],
+                  }))}
+                  onChange={(value) => setScope(value as ExportScope)}
+                />
+              </Field>
+
+              {isBackEmpty && scope !== "front" ? (
+                <p className="text-xs text-ink-500">{t.backEmpty}</p>
+              ) : null}
+
               {format !== "pdf" ? (
                 <Field label={t.quality} stacked>
                   <Select

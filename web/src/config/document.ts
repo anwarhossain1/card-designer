@@ -1,4 +1,4 @@
-import type { DocumentSize } from "@/types/document";
+import type { DocumentSize, SideId } from "@/types/document";
 
 /**
  * Print geometry.
@@ -37,4 +37,8 @@ export const SNAP = {
   gridSize: 8,
 } as const;
 
-export const SCHEMA_VERSION = 1;
+/** Card sides, in print order. The editor shows exactly one at a time. */
+export const SIDE_IDS = ["front", "back"] as const satisfies readonly SideId[];
+
+/** v2 gave every document a back side. */
+export const SCHEMA_VERSION = 2;

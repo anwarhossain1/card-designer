@@ -40,6 +40,11 @@ export const editor = {
     dropHere: "Drop to add to the card",
     loading: "Loading editor…",
   },
+  sides: {
+    label: "Card side",
+    front: "Front",
+    back: "Back",
+  },
   templates: {
     replaceWarning:
       "Applying a template replaces what is on the card. Undo brings your design back.",
@@ -192,6 +197,13 @@ export const editor = {
     png: { label: "PNG", hint: "Sharp, supports transparency" },
     jpeg: { label: "JPEG", hint: "Smaller file, solid background" },
     pdf: { label: "PDF", hint: "Print-ready, 300 DPI" },
+    scope: "Sides",
+    scopes: {
+      front: "Front only",
+      back: "Back only",
+      both: "Both sides",
+    },
+    backEmpty: "The back is still blank — it will come out as a plain card.",
     quality: "Quality",
     resolution: "Export resolution",
     dpiStandard: "Standard (96 DPI)",

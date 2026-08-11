@@ -5,6 +5,7 @@ import { IconButton } from "@/components/ui/IconButton";
 import { useUiStore } from "@/store/uiStore";
 import { useT } from "@/components/i18n/I18nProvider";
 import { ZOOM } from "@/config/document";
+import { SideSwitcher } from "./SideSwitcher";
 import { useCanvas } from "./CanvasProvider";
 
 const PRESETS = [0.5, 1, 2, 4];
@@ -18,6 +19,9 @@ export function ZoomBar() {
   return (
     <div className="flex h-11 shrink-0 items-center justify-between gap-4 border-t border-hairline bg-panel px-3">
       <div className="flex items-center gap-1">
+        <SideSwitcher />
+        <span aria-hidden className="mx-1.5 h-5 w-px bg-hairline" />
+
         <IconButton
           size="sm"
           label={t.grid}

@@ -1,7 +1,8 @@
 # CardCraft — Business Card Designer
 
 A Canva-style editor focused on one product: the 3.5 × 2 inch business card.
-Design in the browser, autosave locally, export print-ready PNG / JPEG / PDF.
+Design both sides in the browser, autosave locally, export print-ready
+PNG / JPEG / PDF.
 
 ```
 card-designer/
@@ -35,10 +36,11 @@ web/src/
 │  ├─ landing/           marketing sections
 │  └─ editor/            toolbar · left sidebar · canvas · right sidebar
 ├─ config/               print geometry, zoom/snap tuning, font registry
-├─ hooks/                canvas, selection, history, shortcuts, autosave
+├─ hooks/                canvas, selection, sides, history, shortcuts, autosave
 ├─ lib/
 │  ├─ api/               fetch client for the Express API
 │  ├─ canvas/            all Fabric.js interaction lives here
+│  ├─ document/          card side helpers and invariants
 │  ├─ export/            PNG · JPEG · PDF renderers
 │  ├─ storage/           LocalStorage persistence
 │  ├─ templates/         bundled template definitions
@@ -54,7 +56,13 @@ web/src/
   rendering server-side for print, touches one folder.
 - **The document is the contract.** `CardDocument` (`types/document.ts`) is what
   gets autosaved, exported and — later — stored per user. `schemaVersion` gates
-  migrations. `kind` and `sides` leave room for back sides and other products.
+  migrations; v2 gave every document a back. `kind` leaves room for other print
+  products.
+- **One canvas, two sides.** Fabric holds only the side being edited; the other
+  lives in `useCardSides` as serialized JSON — the same format autosave and
+  export already speak. Switching is a save-then-load round trip through that
+  format, so a side survives a swap exactly as well as it survives a reload.
+  Undo history is per side, because a snapshot is the whole canvas.
 - **Elements carry metadata.** Every canvas object holds an `ElementMeta`
   envelope (`id`, `kind`, `name`, `role`, `locked`) so layers, properties and
   templates never inspect Fabric internals.
@@ -81,5 +89,7 @@ on error.
 ## Deliberately not built yet
 
 Accounts, saved projects, collaboration, print ordering, payments, template
-marketplace, card backs. The document model, module boundaries and API envelope
-are shaped to absorb them without a rewrite.
+marketplace, and templates that carry a matching back. Export still trims at
+the card edge — bleed and crop marks are configured but not yet emitted. The
+document model, module boundaries and API envelope are shaped to absorb these
+without a rewrite.

@@ -9,14 +9,12 @@ import {
   SAFE_AREA_IN,
   SCHEMA_VERSION,
 } from "@/config/document";
-import {
-  collectFontFamilies,
-  loadScene,
-  serializeScene,
-} from "@/lib/canvas/persistence";
+import { collectFontFamilies, loadScene } from "@/lib/canvas/persistence";
 import { loadDocument, saveDocument } from "@/lib/storage/documentStorage";
+import { getSideScene, normalizeSides } from "@/lib/document/sides";
 import { loadFont } from "@/lib/fonts/loader";
 import { useEditorStore } from "@/store/editorStore";
+import type { CardSidesState } from "./useCardSides";
 
 /** Long enough to merge a burst of edits, short enough to survive a tab close. */
 const AUTOSAVE_DEBOUNCE_MS = 800;
@@ -32,16 +30,21 @@ export interface PersistenceState {
  * History and autosave both wait for `isHydrated`: the undo baseline must be
  * the restored scene (not the blank canvas), and an early autosave of that
  * blank canvas would wipe the stored design before it was ever read.
+ *
+ * The canvas only ever holds one side, so every save asks `sides` for both —
+ * editing the back must never save a document whose front has gone missing.
  */
 export function useDocumentPersistence(
   canvasRef: RefObject<Canvas | null>,
   isReady: boolean,
+  sides: CardSidesState,
 ): PersistenceState {
   const [isHydrated, setIsHydrated] = useState(false);
   const createdAtRef = useRef<string>(new Date().toISOString());
   const timerRef = useRef<number | undefined>(undefined);
 
   const documentName = useEditorStore((state) => state.documentName);
+  const { collectSides, seedSides } = sides;
 
   const persist = useCallback(() => {
     const canvas = canvasRef.current;
@@ -59,7 +62,7 @@ export function useDocumentPersistence(
       bleed: BLEED_IN,
       safeArea: SAFE_AREA_IN,
       templateId,
-      sides: [{ id: "front", scene: serializeScene(canvas) }],
+      sides: collectSides(),
       createdAt: createdAtRef.current,
       updatedAt: now,
     };
@@ -67,7 +70,7 @@ export function useDocumentPersistence(
     if (saveDocument(doc)) {
       useEditorStore.getState().markSaved(now);
     }
-  }, [canvasRef]);
+  }, [canvasRef, collectSides]);
 
   /* -------------------------------------------------------------- hydration */
 
@@ -79,17 +82,29 @@ export function useDocumentPersistence(
 
     const hydrate = async () => {
       const stored = loadDocument();
-      const scene = stored?.sides.find((side) => side.id === "front")?.scene;
 
-      if (stored && scene) {
+      if (stored) {
         createdAtRef.current = stored.createdAt;
 
-        // Fonts first, so restored text lays out against the real face.
-        await Promise.all(collectFontFamilies(scene).map(loadFont));
-        if (cancelled) return;
+        /*
+         * Both sides go into the cache, but only the front reaches the canvas:
+         * a document always reopens on its front, so the store is pinned there
+         * too rather than trusting an activeSide left over from a previous
+         * mount of this same (module-level) store.
+         */
+        const restored = normalizeSides(stored.sides);
+        seedSides(restored);
+        useEditorStore.getState().setActiveSide("front");
 
-        await loadScene(canvas, scene);
-        if (cancelled) return;
+        const scene = getSideScene(restored, "front");
+        if (scene) {
+          // Fonts first, so restored text lays out against the real face.
+          await Promise.all(collectFontFamilies(scene).map(loadFont));
+          if (cancelled) return;
+
+          await loadScene(canvas, scene);
+          if (cancelled) return;
+        }
 
         useEditorStore.getState().hydrate({
           documentId: stored.id,
@@ -107,7 +122,7 @@ export function useDocumentPersistence(
       cancelled = true;
       setIsHydrated(false);
     };
-  }, [canvasRef, isReady]);
+  }, [canvasRef, isReady, seedSides]);
 
   /* --------------------------------------------------------------- autosave */
 
