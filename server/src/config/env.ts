@@ -18,6 +18,14 @@ if (!parsed.success) {
   process.exit(1);
 }
 
+/**
+ * Validated eagerly at import rather than through ConfigModule.
+ *
+ * Whether Mongo is configured decides which modules are imported at all, and
+ * a module's `imports` array is evaluated when its decorator runs — before any
+ * provider, ConfigService included, could have been resolved. Reading a
+ * validated constant sidesteps that ordering entirely.
+ */
 export const env = parsed.data;
 
 export const isProduction = env.NODE_ENV === "production";

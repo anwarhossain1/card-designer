@@ -7,7 +7,7 @@ PNG / JPEG / PDF.
 ```
 card-designer/
 ├─ web/      Next.js 15 (App Router) · TypeScript · Tailwind v4 · Fabric.js · Zustand · React Query
-└─ server/   Express 4 · TypeScript · Mongoose
+└─ server/   NestJS 11 · TypeScript · Mongoose
 ```
 
 ## Running locally
@@ -74,17 +74,27 @@ web/src/
 
 ```
 server/src/
-├─ index.ts              bootstrap + graceful shutdown
-├─ app.ts                middleware pipeline
+├─ main.ts               bootstrap: helmet, CORS, /api prefix, shutdown hooks
+├─ app.module.ts         API surface — feature modules register here
+├─ common/               response envelope, exception filter, zod pipe
 ├─ config/               env validation (zod), optional Mongo connection
-├─ middleware/           404 + centralised error handling
-├─ modules/<feature>/    model · service · controller · routes
-├─ routes/index.ts       API surface
-└─ utils/                AppError, asyncHandler, response envelope, logger
+└─ modules/<feature>/    module · controller · service · schema
 ```
 
 Responses use a single envelope: `{ data }` on success, `{ message, details }`
-on error.
+on error. Both are global — an interceptor wraps every return value and one
+exception filter shapes every failure — so a controller just returns its value
+and a service just throws.
+
+Validation is zod everywhere, including request input: `ZodValidationPipe`
+takes a schema, and a `ZodError` lands in the same `{ message, details }` shape
+as any other failure. Nest's own convention is class-validator DTOs; one schema
+library was judged better than two.
+
+Mongo stays optional while the catalogue ships in the client bundle. With no
+`MONGODB_URI` the Mongoose modules are never imported and the model is injected
+as `undefined`, which is why `TemplatesService` treats it as optional. That ends
+when accounts land.
 
 ## Deliberately not built yet
 
