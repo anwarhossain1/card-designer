@@ -22,9 +22,21 @@ export class AllExceptionsFilter implements ExceptionFilter {
     const response = host.switchToHttp().getResponse<Response>();
 
     if (exception instanceof ZodError) {
+      const flat = exception.flatten();
+      /*
+       * `fieldErrors` is empty when the schema is not an object — a path
+       * parameter validated as a bare string, say — and the reason sits in
+       * `formErrors` instead. Reporting only the first would answer "validation
+       * failed" and then decline to say what.
+       */
+      const details =
+        Object.keys(flat.fieldErrors).length > 0
+          ? flat.fieldErrors
+          : flat.formErrors;
+
       response.status(HttpStatus.BAD_REQUEST).json({
         message: "Validation failed",
-        details: exception.flatten().fieldErrors,
+        details,
       });
       return;
     }

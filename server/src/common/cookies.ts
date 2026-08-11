@@ -3,6 +3,10 @@ import { isProduction } from "../config/env";
 
 export const ACCESS_COOKIE = "cc_access";
 export const REFRESH_COOKIE = "cc_refresh";
+export const GUEST_COOKIE = "cc_guest";
+
+/** A browser keeps its guest identity for a year unless it signs in. */
+const GUEST_MAX_AGE_MS = 365 * 24 * 60 * 60 * 1000;
 
 /**
  * Session cookies.
@@ -41,4 +45,18 @@ export function setSessionCookies(
 export function clearSessionCookies(res: Response): void {
   res.clearCookie(ACCESS_COOKIE, base);
   res.clearCookie(REFRESH_COOKIE, base);
+}
+
+/**
+ * The guest identity is httpOnly too. Nothing in the page needs to read it —
+ * the server is what decides which designs a browser owns — and keeping it out
+ * of JavaScript means a script cannot go fishing for other people's guest ids.
+ */
+export function setGuestCookie(res: Response, guestId: string): void {
+  res.cookie(GUEST_COOKIE, guestId, { ...base, maxAge: GUEST_MAX_AGE_MS });
+}
+
+/** Called once a guest's work has been claimed by a real account. */
+export function clearGuestCookie(res: Response): void {
+  res.clearCookie(GUEST_COOKIE, base);
 }

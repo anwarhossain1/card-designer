@@ -79,7 +79,7 @@ server/src/
 ├─ main.ts               bootstrap: helmet, CORS, /api prefix, shutdown hooks
 ├─ app.module.ts         API surface — feature modules register here
 ├─ common/               response envelope, exception filter, zod pipe,
-│                        auth guard and decorators
+│                        session and guest guards, decorators
 ├─ config/               env validation (zod), Mongo connection
 └─ modules/<feature>/    module · controller · service · schema
 ```
@@ -114,13 +114,33 @@ so a token that is not found was already used and buys nothing. Refresh tokens
 are stored as SHA-256 hashes, capped at five concurrent sessions per account,
 and `tokenVersion` invalidates every session at once.
 
+### Designs and guests
+
+A design belongs to an account **or** to a browser — exactly one of `owner` and
+`guestId` is set, never both. Guests are not a lesser path bolted on beside the
+real one; the two cases differ only in which column the query filters on, and
+signing in moves a row from the second to the first.
+
+Browsers without a session get a `guestId` cookie on first contact, issued by a
+guard rather than middleware because middleware runs before guards and would
+see every signed-in request as anonymous. The cookie is httpOnly like the
+session ones, and responses are mapped to the document shape rather than
+returned as stored — handing a browser back its own guest id would undo the
+point of hiding it.
+
+Signing in claims whatever that browser made, and the guest cookie is dropped
+either way so there is only ever one identity. A failed claim never fails the
+sign-in: the design is still in the browser, and refusing entry over it helps
+nobody. Guests are capped at 10 designs against an account's 50, since a guest
+id is self-issued by anyone who can set a cookie.
+
 ## Deliberately not built yet
 
-Anything a session unlocks: designs still autosave to LocalStorage, so signing
-in changes the header and nothing else yet. Google sign-in, password reset,
-email verification, guest-to-account claiming, saved projects, collaboration,
-print ordering, payments, template marketplace, and templates that carry a
-matching back. Export still trims at
+The editor still autosaves to LocalStorage and never calls the designs API, so
+signing in changes the header and nothing else yet — syncing the two is the
+next step. There is no "my designs" screen. Google sign-in, password reset,
+email verification, collaboration, print ordering, payments, template
+marketplace, and templates that carry a matching back. Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.

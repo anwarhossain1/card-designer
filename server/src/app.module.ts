@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { DatabaseModule } from "./config/database.module";
 import { AuthModule } from "./modules/auth/auth.module";
+import { DesignsModule } from "./modules/designs/designs.module";
 import { HealthModule } from "./modules/health/health.module";
 import { TemplatesModule } from "./modules/templates/templates.module";
 import { UsersModule } from "./modules/users/users.module";
@@ -21,6 +22,7 @@ import { UsersModule } from "./modules/users/users.module";
     DatabaseModule,
     JwtModule.register({}),
     UsersModule,
+    DesignsModule,
     AuthModule,
     HealthModule,
     TemplatesModule,
