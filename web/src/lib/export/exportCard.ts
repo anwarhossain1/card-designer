@@ -35,6 +35,9 @@ export const DPI_PRESETS = [
 /** Browsers drop downloads fired in the same tick as the one before. */
 const DOWNLOAD_GAP_MS = 250;
 
+/** Revoking while the download is still being handed off cancels it. */
+const REVOKE_DELAY_MS = 60_000;
+
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const sanitizeFileName = (name: string) =>
@@ -96,11 +99,37 @@ async function renderScene(
   return canvas;
 }
 
-function triggerDownload(url: string, fileName: string) {
+function dataUrlToBlob(dataUrl: string): Blob {
+  const [header, encoded] = dataUrl.split(",");
+  const mime = /:(.*?);/.exec(header)?.[1] ?? "image/png";
+  const binary = atob(encoded);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i += 1) bytes[i] = binary.charCodeAt(i);
+  return new Blob([bytes], { type: mime });
+}
+
+/**
+ * Hands one file to the browser.
+ *
+ * The URL has to be a blob rather than the `data:` URL the canvas produces:
+ * browsers cap `data:` downloads at a few megabytes, which one 300 DPI card
+ * carrying a photo background clears comfortably, and past that the download
+ * is simply dropped. The anchor also has to be in the document, because a
+ * click on a detached one is silently ignored in some browsers.
+ */
+function triggerDownload(dataUrl: string, fileName: string) {
+  const url = URL.createObjectURL(dataUrlToBlob(dataUrl));
   const anchor = document.createElement("a");
   anchor.href = url;
   anchor.download = fileName;
+  anchor.rel = "noopener";
+  anchor.style.display = "none";
+
+  document.body.append(anchor);
   anchor.click();
+  anchor.remove();
+
+  window.setTimeout(() => URL.revokeObjectURL(url), REVOKE_DELAY_MS);
 }
 
 /**
