@@ -1,5 +1,6 @@
 import { landing } from "./landing";
 import { editor } from "./editor";
+import { auth } from "./auth";
 
 export const en = {
   common: {
@@ -8,6 +9,7 @@ export const en = {
   },
   landing,
   editor,
+  auth,
 };
 
 /**

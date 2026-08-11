@@ -15,6 +15,7 @@ import {
 import { IconButton } from "@/components/ui/IconButton";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
+import { AuthNavAction } from "@/components/auth/AuthNavAction";
 import { DownloadMenu } from "./DownloadMenu";
 import { useEditorStore } from "@/store/editorStore";
 import { useCanvas } from "../canvas/CanvasProvider";
@@ -117,6 +118,8 @@ export function Toolbar() {
       <div className="flex items-center gap-1.5">
         <LocaleToggle compact />
         <ThemeToggle />
+        {/* Returns here after signing in, so a design in progress is not lost. */}
+        <AuthNavAction next="/editor" />
         <DownloadMenu />
       </div>
     </header>

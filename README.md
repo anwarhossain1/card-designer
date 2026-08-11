@@ -28,17 +28,19 @@ even when `MONGODB_URI` is unset.
 
 ```
 web/src/
-├─ app/                  routes: / (landing), /editor
+├─ app/                  routes: / · /editor · /sign-in · /sign-up
 │  ├─ layout.tsx         fonts, metadata, providers
 │  └─ providers.tsx      React Query
 ├─ components/
 │  ├─ ui/                design-system primitives (Button, IconButton, …)
 │  ├─ landing/           marketing sections
+│  ├─ auth/              sign-in and sign-up forms, account menu
 │  └─ editor/            toolbar · left sidebar · canvas · right sidebar
 ├─ config/               print geometry, zoom/snap tuning, font registry
-├─ hooks/                canvas, selection, sides, history, shortcuts, autosave
+├─ hooks/                canvas, selection, sides, history, shortcuts,
+│                        autosave, session
 ├─ lib/
-│  ├─ api/               fetch client for the Express API
+│  ├─ api/               fetch client for the API
 │  ├─ canvas/            all Fabric.js interaction lives here
 │  ├─ document/          card side helpers and invariants
 │  ├─ export/            PNG · JPEG · PDF renderers
@@ -114,10 +116,11 @@ and `tokenVersion` invalidates every session at once.
 
 ## Deliberately not built yet
 
-Any sign-in UI — accounts exist on the API only, and the editor still saves to
-LocalStorage. Google sign-in, password reset, email verification, guest-to-
-account claiming, saved projects, collaboration, print ordering, payments,
-template marketplace, and templates that carry a matching back. Export still trims at
+Anything a session unlocks: designs still autosave to LocalStorage, so signing
+in changes the header and nothing else yet. Google sign-in, password reset,
+email verification, guest-to-account claiming, saved projects, collaboration,
+print ordering, payments, template marketplace, and templates that carry a
+matching back. Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.

@@ -1,6 +1,7 @@
 import type { Dictionary } from "../en";
 import { landing } from "./landing";
 import { editor } from "./editor";
+import { auth } from "./auth";
 
 export const bn: Dictionary = {
   common: {
@@ -9,4 +10,5 @@ export const bn: Dictionary = {
   },
   landing,
   editor,
+  auth,
 };
