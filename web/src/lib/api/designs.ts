@@ -5,6 +5,7 @@ export interface DesignSummary {
   id: string;
   name: string;
   templateId: string | null;
+  thumbnail: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -13,8 +14,11 @@ export interface DesignSummary {
  * The document as the API expects it: every field spelled out, and no `id` —
  * that travels in the URL. Listing the fields rather than spreading the rest
  * means a new local-only field cannot start leaking upward by accident.
+ *
+ * The thumbnail is passed alongside rather than stored in the document: it is
+ * metadata about the design, not part of the card.
  */
-const toPayload = (doc: CardDocument) => ({
+const toPayload = (doc: CardDocument, thumbnail: string | null) => ({
   schemaVersion: doc.schemaVersion,
   kind: doc.kind,
   name: doc.name,
@@ -23,17 +27,21 @@ const toPayload = (doc: CardDocument) => ({
   safeArea: doc.safeArea,
   templateId: doc.templateId,
   sides: doc.sides,
+  ...(thumbnail ? { thumbnail } : {}),
   createdAt: doc.createdAt,
   updatedAt: doc.updatedAt,
 });
 
 export const listDesigns = () => apiRequest<DesignSummary[]>("/designs");
 
-export const saveDesign = (doc: CardDocument) =>
+export const saveDesign = (doc: CardDocument, thumbnail: string | null = null) =>
   apiRequest<CardDocument>(`/designs/${doc.id}`, {
     method: "PUT",
-    body: toPayload(doc),
+    body: toPayload(doc, thumbnail),
   });
+
+export const deleteDesign = (id: string) =>
+  apiRequest<{ deleted: boolean }>(`/designs/${id}`, { method: "DELETE" });
 
 /**
  * The stored copy, or null when this owner has no such design.

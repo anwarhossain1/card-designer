@@ -28,17 +28,18 @@ even when `MONGODB_URI` is unset.
 
 ```
 web/src/
-├─ app/                  routes: / · /editor · /sign-in · /sign-up
+├─ app/                  routes: / · /editor · /designs · /sign-in · /sign-up
 │  ├─ layout.tsx         fonts, metadata, providers
 │  └─ providers.tsx      React Query
 ├─ components/
 │  ├─ ui/                design-system primitives (Button, IconButton, …)
 │  ├─ landing/           marketing sections
 │  ├─ auth/              sign-in and sign-up forms, account menu
+│  ├─ designs/           the saved-cards grid
 │  └─ editor/            toolbar · left sidebar · canvas · right sidebar
 ├─ config/               print geometry, zoom/snap tuning, font registry
 ├─ hooks/                canvas, selection, sides, history, shortcuts,
-│                        autosave, design sync, session
+│                        autosave, design sync, designs list, session
 ├─ lib/
 │  ├─ api/               fetch client for the API
 │  ├─ canvas/            all Fabric.js interaction lives here
@@ -75,6 +76,8 @@ web/src/
   Conflicts resolve last-write-wins on the document's own `updatedAt` — right
   for one person editing one card, and not enough the day two people share
   one, which is why the timestamps belong to the document rather than the row.
+  Only the open card lives locally, so `/editor?design=<id>` uploads the
+  outgoing one before replacing it; the browser is about to forget it.
 - **Files stay small.** ~300 lines max, one responsibility per module.
 
 ## Backend layout
@@ -141,10 +144,10 @@ id is self-issued by anyone who can set a cookie.
 
 ## Deliberately not built yet
 
-A "my designs" screen — the editor syncs one card, the one you last worked on,
-so a second design can only be reached by starting from a blank canvas. Google
-sign-in, password reset, email verification, collaboration, print ordering,
-payments, template marketplace, and templates that carry a matching back. Export still trims at
+Renaming from the designs grid — the editor's name field is the only way, and
+it is the natural place for it. Google sign-in, password reset, email
+verification, collaboration, print ordering, payments, template marketplace,
+and templates that carry a matching back. Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.

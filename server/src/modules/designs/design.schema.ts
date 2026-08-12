@@ -57,6 +57,16 @@ export class Design {
   @Prop({ type: MongooseSchema.Types.Mixed, required: true })
   sides!: unknown;
 
+  /**
+   * A small JPEG data URL of the front, rendered by the editor.
+   *
+   * Metadata about the design rather than part of it: it is what makes the
+   * designs list legible without shipping every scene, so it rides in the
+   * summary and stays out of the document the canvas loads.
+   */
+  @Prop({ type: String, default: null })
+  thumbnail!: string | null;
+
   @Prop({ required: true })
   createdAt!: string;
 

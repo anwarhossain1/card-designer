@@ -4,13 +4,26 @@ import { useEffect, useRef, useState, type RefObject } from "react";
 import type { Canvas } from "fabric";
 import { fetchDesign, listDesigns, saveDesign } from "@/lib/api/designs";
 import { applyDocument } from "@/lib/document/applyDocument";
-import { loadDocument, saveDocument } from "@/lib/storage/documentStorage";
+import {
+  getSideScene,
+  isSceneEmpty,
+  normalizeSides,
+} from "@/lib/document/sides";
+import {
+  clearDocument,
+  loadDocument,
+  saveDocument,
+} from "@/lib/storage/documentStorage";
+import { renderThumbnail } from "@/lib/thumbnail";
 import { useEditorStore } from "@/store/editorStore";
 import type { CardDocument, CardSide } from "@/types/document";
 import { useSession } from "./useSession";
 
 /** Longer than the local autosave, so a burst of edits becomes one upload. */
 const PUSH_DEBOUNCE_MS = 3000;
+
+/** `?design=new` opens a blank card instead of fetching one. */
+const NEW_DESIGN = "new";
 
 export type SyncStatus = "idle" | "syncing" | "synced" | "offline";
 
@@ -19,6 +32,37 @@ export interface DesignSyncState {
 }
 
 const isNewer = (a: string, b: string) => Date.parse(a) > Date.parse(b);
+
+const isBlank = (doc: CardDocument) =>
+  normalizeSides(doc.sides).every((side) => isSceneEmpty(side.scene));
+
+/**
+ * A card nobody has drawn on yet does not earn a row on the server.
+ *
+ * Starting a new design clears the canvas, and clearing it fires the same
+ * events an edit does — so the blank card autosaves locally whether or not it
+ * was ever touched. Uploading those would fill the designs list, and a guest's
+ * ten-card allowance, with nothing.
+ *
+ * Only skipped before the first upload. A design that has been emptied on
+ * purpose is a real change and must still be saved, or deleting everything
+ * would silently fail to stick.
+ */
+const worthUploading = (doc: CardDocument, alreadyPushed: string | null) =>
+  alreadyPushed !== null || !isBlank(doc);
+
+const requestedDesign = () =>
+  new URLSearchParams(window.location.search).get("design");
+
+/**
+ * Drops `?design=` once acted on, so a reload does not switch cards again and
+ * a later reconcile does not undo whatever the user has done since.
+ */
+function forgetRequest(): void {
+  const url = new URL(window.location.href);
+  url.searchParams.delete("design");
+  window.history.replaceState(null, "", url.toString());
+}
 
 /**
  * Keeps the server copy of the design in step with the local one.
@@ -32,6 +76,9 @@ const isNewer = (a: string, b: string) => Date.parse(a) > Date.parse(b);
  * document's own `updatedAt`. For one person editing one card that is exactly
  * right; it stops being enough the day two people share a design, which is why
  * the timestamps are the document's rather than the row's.
+ *
+ * Only the open card lives locally. Switching cards therefore uploads the
+ * outgoing one before replacing it — the browser is about to forget it.
  */
 export function useDesignSync(
   canvasRef: RefObject<Canvas | null>,
@@ -48,16 +95,18 @@ export function useDesignSync(
 
   /* ------------------------------------------------------------- reconcile */
 
-  /*
-   * Runs once the local copy is on the canvas, and again when the identity
-   * changes: signing in has just handed this browser's designs to an account,
-   * and signing out takes them away again.
-   */
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas || !isHydrated) return;
 
     let cancelled = false;
+
+    const push = async (local: CardDocument) => {
+      if (!worthUploading(local, pushedRef.current)) return;
+      const front = getSideScene(normalizeSides(local.sides), "front");
+      await saveDesign(local, await renderThumbnail(front));
+      pushedRef.current = local.updatedAt;
+    };
 
     const adopt = async (remote: CardDocument) => {
       await applyDocument(canvas, remote, seedSides);
@@ -65,9 +114,17 @@ export function useDesignSync(
       pushedRef.current = remote.updatedAt;
     };
 
-    const push = async (local: CardDocument) => {
-      await saveDesign(local);
-      pushedRef.current = local.updatedAt;
+    const startBlank = () => {
+      clearDocument();
+      canvas.discardActiveObject();
+      canvas.remove(...canvas.getObjects());
+      canvas.requestRenderAll();
+      seedSides([]);
+      // A fresh id and creation time. The autosave will still write this blank
+      // card locally — clearing the canvas looks like an edit — but
+      // worthUploading keeps it off the server until it holds something.
+      useEditorStore.getState().reset();
+      pushedRef.current = null;
     };
 
     const reconcile = async () => {
@@ -75,6 +132,27 @@ export function useDesignSync(
 
       try {
         const local = loadDocument();
+        const requested = requestedDesign();
+
+        if (requested && requested !== local?.id) {
+          // The outgoing card is about to be replaced locally; bank it first.
+          if (local) await push(local);
+          if (cancelled) return;
+
+          if (requested === NEW_DESIGN) {
+            startBlank();
+          } else {
+            const remote = await fetchDesign(requested);
+            if (cancelled) return;
+            if (remote) await adopt(remote);
+          }
+
+          forgetRequest();
+          if (!cancelled) setSyncStatus("synced");
+          return;
+        }
+
+        if (requested) forgetRequest();
 
         if (local) {
           const remote = await fetchDesign(local.id);
@@ -128,14 +206,20 @@ export function useDesignSync(
       const local = loadDocument();
       // Nothing new since the last upload — reconcile may have just sent it.
       if (!local || pushedRef.current === local.updatedAt) return;
+      if (!worthUploading(local, pushedRef.current)) return;
 
       setSyncStatus("syncing");
-      saveDesign(local)
-        .then(() => {
+
+      void (async () => {
+        try {
+          const front = getSideScene(normalizeSides(local.sides), "front");
+          await saveDesign(local, await renderThumbnail(front));
           pushedRef.current = local.updatedAt;
           setSyncStatus("synced");
-        })
-        .catch(() => setSyncStatus("offline"));
+        } catch {
+          setSyncStatus("offline");
+        }
+      })();
     }, PUSH_DEBOUNCE_MS);
 
     return () => window.clearTimeout(timerRef.current);

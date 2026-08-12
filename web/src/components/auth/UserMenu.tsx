@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Loader2, LogOut } from "lucide-react";
+import Link from "next/link";
+import { LayoutGrid, Loader2, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useT } from "@/components/i18n/I18nProvider";
 import { useLogout } from "@/hooks/useSession";
@@ -20,7 +21,8 @@ function initials(name: string): string {
 }
 
 export function UserMenu({ user }: { user: AuthUser }) {
-  const t = useT().auth;
+  const dictionary = useT();
+  const t = dictionary.auth;
   const [isOpen, setIsOpen] = useState(false);
   const signOut = useLogout();
 
@@ -64,6 +66,16 @@ export function UserMenu({ user }: { user: AuthUser }) {
             </div>
 
             <div aria-hidden className="my-1 h-px bg-hairline" />
+
+            <Link
+              href="/designs"
+              role="menuitem"
+              onClick={() => setIsOpen(false)}
+              className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-100"
+            >
+              <LayoutGrid className="h-4 w-4" />
+              {dictionary.designs.title}
+            </Link>
 
             <button
               type="button"

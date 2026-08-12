@@ -6,6 +6,7 @@ import {
   Copy,
   ClipboardPaste,
   CopyPlus,
+  LayoutGrid,
   Redo2,
   Trash2,
   Undo2,
@@ -22,7 +23,8 @@ import { useCanvasActions } from "@/hooks/useCanvasActions";
 import { useT } from "@/components/i18n/I18nProvider";
 
 export function Toolbar() {
-  const t = useT().editor.toolbar;
+  const dictionary = useT();
+  const t = dictionary.editor.toolbar;
   const documentName = useEditorStore((state) => state.documentName);
   const setDocumentName = useEditorStore((state) => state.setDocumentName);
   const { selected, undo, redo, canUndo, canRedo, copy, paste, hasClipboard } =
@@ -96,6 +98,14 @@ export function Toolbar() {
       </div>
 
       <div className="flex items-center gap-1.5">
+        {/* Guests own designs too, so this cannot live in the account menu. */}
+        <Link
+          href="/designs"
+          aria-label={dictionary.designs.title}
+          className="grid h-8 w-8 place-items-center rounded-md text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900"
+        >
+          <LayoutGrid className="h-4 w-4" />
+        </Link>
         <LocaleToggle compact />
         <ThemeToggle />
         {/* Returns here after signing in, so a design in progress is not lost. */}

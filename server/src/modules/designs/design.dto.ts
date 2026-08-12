@@ -32,6 +32,15 @@ export const saveDesignSchema = z.object({
   safeArea: z.number().min(0),
   templateId: z.string().max(80).nullable(),
   sides: z.array(sideSchema).min(1).max(2),
+  /**
+   * Capped and format-checked so a design row cannot quietly become an image
+   * host. A 250x143 JPEG of a card lands well under this.
+   */
+  thumbnail: z
+    .string()
+    .startsWith("data:image/")
+    .max(200_000)
+    .nullish(),
   createdAt: z.string().datetime(),
   updatedAt: z.string().datetime(),
 });

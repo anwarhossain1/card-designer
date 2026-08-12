@@ -3,6 +3,7 @@
 import Link from "next/link";
 import {
   Grid3x3,
+  LayoutGrid,
   Loader2,
   LogIn,
   LogOut,
@@ -89,7 +90,8 @@ export function MoreSheetContent() {
  * signed out it is one link, signed in it is who you are plus the way out.
  */
 function AccountSection() {
-  const t = useT().auth;
+  const dictionary = useT();
+  const t = dictionary.auth;
   const { user, isPending } = useSession();
   const signOut = useLogout();
 
@@ -97,6 +99,14 @@ function AccountSection() {
 
   return (
     <Section title={t.nav.account}>
+      <Link
+        href="/designs"
+        className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-sm text-ink-700 transition-colors active:bg-ink-100"
+      >
+        <LayoutGrid className="h-4 w-4" />
+        {dictionary.designs.title}
+      </Link>
+
       {user ? (
         <>
           <div className="px-3 py-1">

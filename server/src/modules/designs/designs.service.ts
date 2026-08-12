@@ -38,6 +38,7 @@ export interface DesignSummary {
   id: string;
   name: string;
   templateId: string | null;
+  thumbnail: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -69,6 +70,7 @@ const toSummary = (design: Design): DesignSummary => ({
   id: design.documentId,
   name: design.name,
   templateId: design.templateId,
+  thumbnail: design.thumbnail ?? null,
   createdAt: design.createdAt,
   updatedAt: design.updatedAt,
 });
