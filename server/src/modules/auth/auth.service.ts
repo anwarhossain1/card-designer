@@ -1,9 +1,19 @@
+import { randomBytes } from "node:crypto";
 import {
+  BadRequestException,
   ForbiddenException,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from "@nestjs/common";
 import bcrypt from "bcrypt";
+import { env } from "../../config/env";
+import { MailService } from "../mail/mail.service";
+import {
+  passwordChangedEmail,
+  passwordResetEmail,
+  type MailLocale,
+} from "../mail/templates";
 import {
   UsersService,
   toPublicUser,
@@ -20,6 +30,9 @@ import type { LoginInput, RegisterInput } from "./auth.dto";
  */
 const DUMMY_HASH = "$2b$12$C6UzMDM.H6dfI/f/IKcEe.uCVdD5ZoUJ4SmVX5FiZ0Rv0KLZ0j5Xq";
 
+/** Short enough that a link left in an inbox is not a standing key. */
+const RESET_TTL_MINUTES = 15;
+
 export interface Session {
   user: PublicUser;
   accessToken: string;
@@ -28,9 +41,12 @@ export interface Session {
 
 @Injectable()
 export class AuthService {
+  private readonly logger = new Logger(AuthService.name);
+
   constructor(
     private readonly users: UsersService,
     private readonly tokens: TokensService,
+    private readonly mail: MailService,
   ) {}
 
   async register(input: RegisterInput, userAgent?: string): Promise<Session> {
@@ -114,6 +130,77 @@ export class AuthService {
     } catch {
       // Expired or forged — there is no session to remove either way.
     }
+  }
+
+  /**
+   * Always succeeds, whether or not the address has an account.
+   *
+   * Answering differently would turn this endpoint into a way to ask "does
+   * this person use CardCraft" — and a password reset form is exactly where
+   * someone would go to find out.
+   */
+  async requestPasswordReset(
+    email: string,
+    locale: MailLocale,
+  ): Promise<void> {
+    const user = await this.users.findByEmail(email);
+    if (!user || !user.isActive) return;
+
+    const token = randomBytes(32).toString("hex");
+    const expiresAt = new Date(Date.now() + RESET_TTL_MINUTES * 60_000);
+
+    await this.users.startPasswordReset(
+      user._id.toString(),
+      this.tokens.hash(token),
+      expiresAt,
+    );
+
+    // Only the raw token leaves; what is stored cannot be used to reset.
+    const resetUrl = `${env.FRONTEND_URL}/reset-password?token=${token}`;
+
+    await this.mail.send(
+      user.email,
+      passwordResetEmail(locale, {
+        name: user.name,
+        resetUrl,
+        minutes: RESET_TTL_MINUTES,
+      }),
+    );
+  }
+
+  async resetPassword(
+    token: string,
+    password: string,
+    locale: MailLocale,
+  ): Promise<void> {
+    const user = await this.users.findByResetTokenHash(this.tokens.hash(token));
+
+    // One message for spent, forged and expired alike — which it was is not
+    // information worth handing out.
+    if (!user) {
+      throw new BadRequestException("This reset link is invalid or has expired");
+    }
+
+    await this.users.completePasswordReset(
+      user._id.toString(),
+      await this.users.hashPassword(password),
+    );
+
+    // The reset already happened; a failed notice must not undo it.
+    void this.mail
+      .send(
+        user.email,
+        passwordChangedEmail(locale, {
+          name: user.name,
+          signInUrl: `${env.FRONTEND_URL}/sign-in`,
+        }),
+      )
+      .catch((error: unknown) => {
+        this.logger.error(
+          "Failed to send password-changed notice",
+          error instanceof Error ? error.stack : String(error),
+        );
+      });
   }
 
   async me(userId: string): Promise<PublicUser> {

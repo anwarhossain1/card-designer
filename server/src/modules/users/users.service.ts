@@ -67,6 +67,68 @@ export class UsersService {
     return this.users.findOne({ email }).select("+passwordHash").exec();
   }
 
+  findByEmail(email: string) {
+    return this.users.findOne({ email }).exec();
+  }
+
+  hashPassword(password: string): Promise<string> {
+    return bcrypt.hash(password, BCRYPT_ROUNDS);
+  }
+
+  async startPasswordReset(
+    userId: string,
+    tokenHash: string,
+    expiresAt: Date,
+  ): Promise<void> {
+    await this.users
+      .updateOne(
+        { _id: userId },
+        {
+          $set: {
+            passwordResetTokenHash: tokenHash,
+            passwordResetExpiresAt: expiresAt,
+          },
+        },
+      )
+      .exec();
+  }
+
+  /** Only ever returns a token that is both current and unexpired. */
+  findByResetTokenHash(tokenHash: string) {
+    return this.users
+      .findOne({
+        passwordResetTokenHash: tokenHash,
+        passwordResetExpiresAt: { $gt: new Date() },
+      })
+      .exec();
+  }
+
+  /**
+   * Sets the new password and closes every door behind it: the reset token is
+   * spent, stored sessions are dropped, and tokenVersion moves so any refresh
+   * token still in a browser stops working. Whoever forced the reset should be
+   * signed out by it, not left holding a session.
+   */
+  async completePasswordReset(
+    userId: string,
+    passwordHash: string,
+  ): Promise<void> {
+    await this.users
+      .updateOne(
+        { _id: userId },
+        {
+          $set: {
+            passwordHash,
+            passwordResetTokenHash: null,
+            passwordResetExpiresAt: null,
+            refreshTokens: [],
+          },
+          $inc: { tokenVersion: 1 },
+        },
+      )
+      .exec();
+  }
+
   findById(id: string) {
     return this.users.findById(id).exec();
   }

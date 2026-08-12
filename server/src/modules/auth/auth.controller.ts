@@ -8,7 +8,9 @@ import {
   Post,
   Req,
   Res,
+  UseGuards,
 } from "@nestjs/common";
+import { Throttle, ThrottlerGuard } from "@nestjs/throttler";
 import type { Request, Response } from "express";
 import {
   GUEST_COOKIE,
@@ -25,15 +27,25 @@ import { ZodValidationPipe } from "../../common/zod-validation.pipe";
 import { AuthService, type Session } from "./auth.service";
 import { TokensService } from "./tokens.service";
 import {
+  forgotPasswordSchema,
   loginSchema,
   registerSchema,
+  resetPasswordSchema,
+  type ForgotPasswordInput,
   type LoginInput,
   type RegisterInput,
+  type ResetPasswordInput,
 } from "./auth.dto";
 
 const readCookie = (request: Request, name: string): string | undefined =>
   (request.cookies as Record<string, string> | undefined)?.[name];
 
+/**
+ * Rate limited, and only here. These endpoints are the ones worth guessing at
+ * or firing in bulk; the editor's autosave is not, and a limit shared with it
+ * would have to be so loose as to be pointless.
+ */
+@UseGuards(ThrottlerGuard)
 @Controller("auth")
 export class AuthController {
   private readonly logger = new Logger(AuthController.name);
@@ -97,6 +109,34 @@ export class AuthController {
     await this.auth.logout(readCookie(request, REFRESH_COOKIE));
     clearSessionCookies(response);
     return { signedOut: true };
+  }
+
+  /** Tighter than the rest: each call sends mail to somebody else's inbox. */
+  @Public()
+  @Throttle({ default: { limit: 3, ttl: 600_000 } })
+  @Post("forgot-password")
+  @HttpCode(HttpStatus.OK)
+  async forgotPassword(
+    @Body(new ZodValidationPipe(forgotPasswordSchema))
+    body: ForgotPasswordInput,
+  ) {
+    await this.auth.requestPasswordReset(body.email, body.locale);
+    // The same answer either way — see AuthService.requestPasswordReset.
+    return { sent: true };
+  }
+
+  @Public()
+  @Throttle({ default: { limit: 5, ttl: 600_000 } })
+  @Post("reset-password")
+  @HttpCode(HttpStatus.OK)
+  async resetPassword(
+    @Body(new ZodValidationPipe(resetPasswordSchema)) body: ResetPasswordInput,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    await this.auth.resetPassword(body.token, body.password, body.locale);
+    // Every session was just revoked, including whatever this browser held.
+    clearSessionCookies(response);
+    return { reset: true };
   }
 
   @Get("me")

@@ -1,6 +1,7 @@
 import { Module } from "@nestjs/common";
 import { APP_GUARD } from "@nestjs/core";
 import { JwtModule } from "@nestjs/jwt";
+import { ThrottlerModule } from "@nestjs/throttler";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { DatabaseModule } from "./config/database.module";
 import { AuthModule } from "./modules/auth/auth.module";
@@ -20,6 +21,12 @@ import { UsersModule } from "./modules/users/users.module";
 @Module({
   imports: [
     DatabaseModule,
+    /*
+     * Registered, not applied globally. Only AuthController opts in — the
+     * editor autosaves every few seconds, and a limit loose enough for that
+     * would not slow anyone down on a login form.
+     */
+    ThrottlerModule.forRoot([{ ttl: 60_000, limit: 30 }]),
     JwtModule.register({}),
     UsersModule,
     DesignsModule,

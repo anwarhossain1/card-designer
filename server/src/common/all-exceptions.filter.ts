@@ -42,6 +42,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
     }
 
     if (exception instanceof HttpException) {
+      const status = exception.getStatus();
       const body = exception.getResponse();
       // Nest puts thrown objects here; lift `details` so callers keep seeing it.
       const details =
@@ -49,8 +50,18 @@ export class AllExceptionsFilter implements ExceptionFilter {
           ? (body as { details?: unknown }).details
           : undefined;
 
-      response.status(exception.getStatus()).json({
-        message: exception.message,
+      /*
+       * The throttler's own message is "ThrottlerException: Too Many
+       * Requests" — a class name, which is not something to show anyone.
+       * Every other message from this API is a sentence.
+       */
+      const message =
+        status === HttpStatus.TOO_MANY_REQUESTS
+          ? "Too many requests. Please wait a moment and try again."
+          : exception.message;
+
+      response.status(status).json({
+        message,
         ...(details === undefined ? {} : { details }),
       });
       return;

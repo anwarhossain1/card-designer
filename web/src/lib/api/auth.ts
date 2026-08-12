@@ -26,6 +26,22 @@ export const login = (body: Credentials) =>
 export const logout = () =>
   apiRequest<{ signedOut: boolean }>("/auth/logout", { method: "POST" });
 
+/** `locale` decides which language the email arrives in. */
+export const requestPasswordReset = (body: { email: string; locale: string }) =>
+  apiRequest<{ sent: boolean }>("/auth/forgot-password", {
+    method: "POST",
+    body,
+  });
+
+export const resetPassword = (body: {
+  token: string;
+  password: string;
+  locale: string;
+}) => apiRequest<{ reset: boolean }>("/auth/reset-password", {
+  method: "POST",
+  body,
+});
+
 /**
  * The signed-in user, or null.
  *

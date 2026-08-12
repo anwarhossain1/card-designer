@@ -48,6 +48,17 @@ export class User {
   refreshTokens!: RefreshToken[];
 
   /**
+   * SHA-256 of the token that was emailed, never the token itself — the same
+   * reasoning as refresh tokens. A dump of this collection must not hand
+   * anyone a working reset link.
+   */
+  @Prop({ type: String, default: null, select: false })
+  passwordResetTokenHash!: string | null;
+
+  @Prop({ type: Date, default: null, select: false })
+  passwordResetExpiresAt!: Date | null;
+
+  /**
    * Bumped to invalidate every issued token at once — a password change, or a
    * "sign out everywhere". Compared when refreshing rather than on every
    * request, so revocation costs one database read per refresh instead of one
@@ -61,3 +72,10 @@ export class User {
 export type UserDocument = HydratedDocument<User>;
 
 export const UserSchema = SchemaFactory.createForClass(User);
+
+// Partial rather than sparse: sparse still indexes explicit nulls, so every
+// account without a pending reset would share one index entry.
+UserSchema.index(
+  { passwordResetTokenHash: 1 },
+  { partialFilterExpression: { passwordResetTokenHash: { $type: "string" } } },
+);

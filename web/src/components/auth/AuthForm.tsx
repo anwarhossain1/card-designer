@@ -114,7 +114,16 @@ export function AuthForm({ mode }: { mode: Mode }) {
       <h1 className="text-xl font-semibold text-ink-900">{copy.title}</h1>
       <p className="mt-1.5 text-sm text-ink-500">{copy.subtitle}</p>
 
-      <form onSubmit={(event) => void submit(event)} className="mt-6 space-y-4">
+      {/*
+        noValidate: a type="email" field makes the browser refuse to submit and
+        show its own tooltip, in the browser's language rather than the app's.
+        The checks in `validate` are the ones that speak Bangla.
+      */}
+      <form
+        noValidate
+        onSubmit={(event) => void submit(event)}
+        className="mt-6 space-y-4"
+      >
         {isSignUp ? (
           <AuthField
             label={t.fields.name}
@@ -138,6 +147,17 @@ export function AuthForm({ mode }: { mode: Mode }) {
           autoComplete="email"
           autoFocus={!isSignUp}
         />
+
+        {isSignUp ? null : (
+          <div className="flex justify-end">
+            <Link
+              href="/forgot-password"
+              className="text-xs font-medium text-brand-600 transition-colors hover:text-brand-700"
+            >
+              {t.forgot.link}
+            </Link>
+          </div>
+        )}
 
         <AuthField
           label={t.fields.password}

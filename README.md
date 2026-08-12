@@ -29,6 +29,7 @@ even when `MONGODB_URI` is unset.
 ```
 web/src/
 ├─ app/                  routes: / · /editor · /designs · /sign-in · /sign-up
+│                        /forgot-password · /reset-password
 │  ├─ layout.tsx         fonts, metadata, providers
 │  └─ providers.tsx      React Query
 ├─ components/
@@ -122,6 +123,22 @@ so a token that is not found was already used and buys nothing. Refresh tokens
 are stored as SHA-256 hashes, capped at five concurrent sessions per account,
 and `tokenVersion` invalidates every session at once.
 
+Password reset emails a single-use token that lasts 15 minutes; only its
+SHA-256 is stored, so the database never holds a working link. Completing a
+reset spends the token, drops every stored session and moves `tokenVersion` —
+whoever forced the reset is signed out by it rather than left holding a
+session. Asking for a reset always answers the same way, whether or not the
+address has an account; a reset form is exactly where someone would go to find
+out who uses CardCraft.
+
+Only `/auth/*` is rate limited. Those are the endpoints worth guessing at or
+firing in bulk, and a limit loose enough for an autosave every few seconds
+would not slow anyone down on a login form.
+
+Without `SMTP_USER`/`SMTP_PASS` the mailer writes to the server log instead of
+sending, which is convenient in development. Production refuses to start
+without them: a reset link that cannot be delivered is a locked-out user.
+
 ### Designs and guests
 
 A design belongs to an account **or** to a browser — exactly one of `owner` and
@@ -145,9 +162,9 @@ id is self-issued by anyone who can set a cookie.
 ## Deliberately not built yet
 
 Renaming from the designs grid — the editor's name field is the only way, and
-it is the natural place for it. Google sign-in, password reset, email
-verification, collaboration, print ordering, payments, template marketplace,
-and templates that carry a matching back. Export still trims at
+it is the natural place for it. Google sign-in, email verification,
+collaboration, print ordering, payments, template marketplace, and templates
+that carry a matching back. Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.

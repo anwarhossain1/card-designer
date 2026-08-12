@@ -44,7 +44,33 @@ export const auth = {
     emailTaken: "That email already has an account.",
     suspended: "This account has been suspended.",
     offline: "Could not reach the server. Check your connection.",
+    tooMany: "Too many attempts. Wait a few minutes and try again.",
     generic: "Something went wrong. Please try again.",
+  },
+  forgot: {
+    link: "Forgot password?",
+    title: "Reset your password",
+    subtitle: "We will email you a link to set a new one.",
+    submit: "Send reset link",
+    busy: "Sending…",
+    sentTitle: "Check your inbox",
+    sentBody: (email: string) =>
+      `If ${email} has an account, a reset link is on its way. It works for 15 minutes.`,
+    backToSignIn: "Back to sign in",
+  },
+  reset: {
+    title: "Set a new password",
+    subtitle: "Pick one you do not use anywhere else.",
+    newPassword: "New password",
+    submit: "Save new password",
+    busy: "Saving…",
+    doneTitle: "Password changed",
+    doneBody:
+      "You have been signed out on every device. Sign in with your new password.",
+    invalidLink:
+      "This reset link is invalid or has expired. Links last 15 minutes.",
+    requestNew: "Request a new link",
+    missingToken: "This link is incomplete. Request a new one.",
   },
   /** Designs are still on this device until saved projects land. */
   localNote:
