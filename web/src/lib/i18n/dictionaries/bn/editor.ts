@@ -221,6 +221,10 @@ export const editor: Dictionary["editor"] = {
     dpiLarge: "বড় (১৯২ DPI)",
     dpiPrint: "প্রিন্ট (৩০০ DPI)",
     transparent: "স্বচ্ছ ব্যাকগ্রাউন্ড",
+    printMarks: "ব্লিড ও ক্রপ মার্ক",
+    printMarksHint: "প্রিন্টের দোকানের জন্য — কার্ডের চারপাশে ০.২৫ ইঞ্চি যোগ হয়।",
+    safeAreaWarning:
+      "কিছু জিনিস কিনারার খুব কাছে আছে, কাটার সময় বাদ পড়তে পারে। সেফ এরিয়ার ভেতরে সরান।",
     preparing: "প্রস্তুত হচ্ছে…",
     action: (format: string) => `${format} ডাউনলোড করুন`,
     failed: "এক্সপোর্ট ব্যর্থ হয়েছে — আবার চেষ্টা করুন।",

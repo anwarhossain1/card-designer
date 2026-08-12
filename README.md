@@ -45,7 +45,7 @@ web/src/
 │  ├─ api/               fetch client for the API
 │  ├─ canvas/            all Fabric.js interaction lives here
 │  ├─ document/          card side helpers and invariants
-│  ├─ export/            PNG · JPEG · PDF renderers
+│  ├─ export/            PNG · JPEG · PDF renderers, bleed and crop marks
 │  ├─ storage/           LocalStorage persistence
 │  ├─ templates/         bundled template definitions
 │  └─ utils/             cn, ids, unit conversion
@@ -70,6 +70,13 @@ web/src/
 - **Elements carry metadata.** Every canvas object holds an `ElementMeta`
   envelope (`id`, `kind`, `name`, `role`, `locked`) so layers, properties and
   templates never inspect Fabric internals.
+- **Bleed is generated, not designed.** The canvas stops at the trim line, so
+  export extends the card's outermost pixels outward to fill the bleed rather
+  than asking anyone to draw into it. That is exact at the trim line for a flat
+  colour, a bar or a photograph alike, and the stretched pixels only ever live
+  in the part that gets cut away. Scaling the design up instead would push an
+  edge-anchored element off the card, and enlarging only the background would
+  leave a white sliver wherever a shape met the edge.
 - **Persistence is offline-first.** LocalStorage is the real autosave: it is
   synchronous, so it still lands when a tab closes, and a network that comes
   and goes never costs anyone the twenty minutes they just spent on a card.
@@ -161,10 +168,11 @@ id is self-issued by anyone who can set a cookie.
 
 ## Deliberately not built yet
 
-Renaming from the designs grid — the editor's name field is the only way, and
-it is the natural place for it. Google sign-in, email verification,
-collaboration, print ordering, payments, template marketplace, and templates
-that carry a matching back. Export still trims at
+A vector PDF — text is still rendered at 300 DPI and rasterised, which softens
+slightly in print. Renaming from the designs grid; the editor's name field is
+the only way, and it is the natural place for it. Google sign-in, email
+verification, collaboration, print ordering, payments, template marketplace,
+and templates that carry a matching back. Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.

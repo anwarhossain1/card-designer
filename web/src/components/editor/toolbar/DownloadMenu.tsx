@@ -10,6 +10,7 @@ import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useT } from "@/components/i18n/I18nProvider";
 import { useEditorStore } from "@/store/editorStore";
 import { getSideScene, isSceneEmpty } from "@/lib/document/sides";
+import { findSidesOutsideSafeArea } from "@/lib/export/safeArea";
 import {
   DPI_PRESETS,
   exportCard,
@@ -17,6 +18,7 @@ import {
   type ExportFormat,
   type ExportScope,
 } from "@/lib/export/exportCard";
+import type { SideId } from "@/types/document";
 
 const FORMATS: ExportFormat[] = ["png", "jpeg", "pdf"];
 const SCOPES: ExportScope[] = ["front", "back", "both"];
@@ -33,8 +35,14 @@ export function DownloadMenu() {
   const [isBackEmpty, setIsBackEmpty] = useState(true);
   const [dpi, setDpi] = useState(300);
   const [transparent, setTransparent] = useState(false);
+  /** null until the user has an opinion; before that it follows the format. */
+  const [marksChoice, setMarksChoice] = useState<boolean | null>(null);
+  const [crowdedSides, setCrowdedSides] = useState<SideId[]>([]);
   const [isBusy, setIsBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // PDF is the format people hand to a printer; the image formats are not.
+  const printMarks = marksChoice ?? format === "pdf";
 
   /*
    * Opening the menu is the moment to ask what the card actually contains.
@@ -43,9 +51,22 @@ export function DownloadMenu() {
    */
   useEffect(() => {
     if (!isOpen) return;
-    const backIsEmpty = isSceneEmpty(getSideScene(collectSides(), "back"));
+
+    const snapshot = collectSides();
+    const backIsEmpty = isSceneEmpty(getSideScene(snapshot, "back"));
     setIsBackEmpty(backIsEmpty);
     setScope(backIsEmpty ? "front" : "both");
+
+    // Checked here rather than on every edit: it costs an offscreen render of
+    // each side, and this is the moment it stops being reversible.
+    let cancelled = false;
+    void findSidesOutsideSafeArea(snapshot).then((sides) => {
+      if (!cancelled) setCrowdedSides(sides);
+    });
+
+    return () => {
+      cancelled = true;
+    };
   }, [isOpen, collectSides]);
 
   const download = async () => {
@@ -61,6 +82,7 @@ export function DownloadMenu() {
         format,
         dpi,
         transparent,
+        printMarks,
         fileName: documentName,
       });
       setIsOpen(false);
@@ -148,7 +170,24 @@ export function DownloadMenu() {
                 </Field>
               ) : null}
 
-              {format === "png" ? (
+              <label className="flex items-start gap-2 text-xs text-ink-600">
+                <input
+                  type="checkbox"
+                  checked={printMarks}
+                  onChange={(event) => setMarksChoice(event.target.checked)}
+                  className="mt-0.5 h-4 w-4 accent-brand-600"
+                />
+                <span>
+                  {t.printMarks}
+                  <span className="block text-[11px] text-ink-400">
+                    {t.printMarksHint}
+                  </span>
+                </span>
+              </label>
+
+              {/* Transparency and a print sheet are incompatible: the bleed is
+                  built from the card's own edge pixels, and paper is not clear. */}
+              {format === "png" && !printMarks ? (
                 <label className="flex items-center gap-2 text-xs text-ink-600">
                   <input
                     type="checkbox"
@@ -158,6 +197,14 @@ export function DownloadMenu() {
                   />
                   {t.transparent}
                 </label>
+              ) : null}
+
+              {crowdedSides.some(
+                (side) => scope === "both" || scope === side,
+              ) ? (
+                <p className="rounded-md border border-warning-ink/30 bg-warning-ink/5 px-2.5 py-2 text-[11px] leading-relaxed text-warning-ink">
+                  {t.safeAreaWarning}
+                </p>
               ) : null}
 
               {error ? (

@@ -212,6 +212,10 @@ export const editor = {
     dpiLarge: "Large (192 DPI)",
     dpiPrint: "Print (300 DPI)",
     transparent: "Transparent background",
+    printMarks: "Bleed and crop marks",
+    printMarksHint: "For a print shop — adds 0.25 in around the card.",
+    safeAreaWarning:
+      "Something sits close to the edge and may be trimmed off. Move it inside the safe-area guide.",
     preparing: "Preparing…",
     action: (format: string) => `Download ${format}`,
     failed: "Export failed — try again.",

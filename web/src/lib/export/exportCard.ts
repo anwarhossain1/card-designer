@@ -5,10 +5,12 @@ import {
   CARD_SIZE_IN,
   DESIGN_DPI,
   PRINT_DPI,
+  PRINT_SIZE_IN,
 } from "@/config/document";
 import { collectFontFamilies } from "@/lib/canvas/persistence";
 import { loadFont } from "@/lib/fonts/loader";
 import { getMeta } from "@/lib/canvas/meta";
+import { composePrintSheet } from "./printSheet";
 import type { CardSide, SceneJSON } from "@/types/document";
 
 export type ExportFormat = "png" | "jpeg" | "pdf";
@@ -22,6 +24,11 @@ export interface ExportOptions {
   dpi: number;
   /** PNG only: omit the backdrop and the white backing. */
   transparent: boolean;
+  /**
+   * Bleed and crop marks. What a print shop needs and what anyone using the
+   * card on screen does not, so it is asked rather than assumed.
+   */
+  printMarks: boolean;
   fileName: string;
 }
 
@@ -148,13 +155,21 @@ export async function exportCard(sides: CardSide[], options: ExportOptions) {
   for (const side of sides) {
     const canvas = await renderScene(side.scene, options);
     try {
+      /*
+       * Rendered to an element rather than straight to a data URL, because the
+       * print sheet is drawn around the card afterwards and needs its pixels.
+       */
+      const card = canvas.toCanvasElement(multiplier);
+      const sheet = options.printMarks
+        ? composePrintSheet(card, multiplier)
+        : card;
+
       pages.push({
         id: side.id,
-        dataUrl: canvas.toDataURL({
-          format: options.format === "jpeg" ? "jpeg" : "png",
-          quality: 0.92,
-          multiplier,
-        }),
+        dataUrl: sheet.toDataURL(
+          options.format === "jpeg" ? "image/jpeg" : "image/png",
+          0.92,
+        ),
       });
     } finally {
       void canvas.dispose();
@@ -164,7 +179,10 @@ export async function exportCard(sides: CardSide[], options: ExportOptions) {
   if (options.format === "pdf") {
     // Loaded on demand — most sessions never export a PDF.
     const { jsPDF } = await import("jspdf");
-    const size: [number, number] = [CARD_SIZE_IN.width, CARD_SIZE_IN.height];
+    // The page is the whole sheet when it carries marks: a printer trims the
+    // page down to the card, so the card must not be the page.
+    const geometry = options.printMarks ? PRINT_SIZE_IN : CARD_SIZE_IN;
+    const size: [number, number] = [geometry.width, geometry.height];
     const pdf = new jsPDF({ unit: "in", format: size, orientation: "landscape" });
 
     pages.forEach((page, index) => {
