@@ -9,6 +9,12 @@ import type { SideId } from "@/types/document";
 interface EditorState {
   documentId: string;
   documentName: string;
+  /**
+   * When the design was first created, not when this tab opened. It belongs to
+   * the document, so a copy taken from the server brings its own — which is
+   * why it lives here rather than in a ref beside the autosave.
+   */
+  documentCreatedAt: string;
   templateId: string | null;
   /** Which side the canvas is showing. The other side lives in useCardSides. */
   activeSide: SideId;
@@ -28,6 +34,7 @@ interface EditorState {
   hydrate: (doc: {
     documentId: string;
     documentName: string;
+    documentCreatedAt: string;
     templateId: string | null;
     lastSavedAt: string | null;
   }) => void;
@@ -37,6 +44,7 @@ interface EditorState {
 const initial = () => ({
   documentId: createId("doc"),
   documentName: "Untitled card",
+  documentCreatedAt: new Date().toISOString(),
   templateId: null as string | null,
   activeSide: "front" as SideId,
   selection: [] as string[],

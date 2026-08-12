@@ -12,6 +12,8 @@ export const editor: Dictionary["editor"] = {
     delete: "মুছে ফেলুন (Del)",
     saving: "সেভ হচ্ছে…",
     saved: "সেভ হয়েছে",
+    syncing: "সিঙ্ক হচ্ছে…",
+    savedOnDevice: "এই ডিভাইসে সেভ আছে",
     download: "ডাউনলোড",
   },
   panels: {

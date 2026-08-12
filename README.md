@@ -38,7 +38,7 @@ web/src/
 │  └─ editor/            toolbar · left sidebar · canvas · right sidebar
 ├─ config/               print geometry, zoom/snap tuning, font registry
 ├─ hooks/                canvas, selection, sides, history, shortcuts,
-│                        autosave, session
+│                        autosave, design sync, session
 ├─ lib/
 │  ├─ api/               fetch client for the API
 │  ├─ canvas/            all Fabric.js interaction lives here
@@ -68,8 +68,13 @@ web/src/
 - **Elements carry metadata.** Every canvas object holds an `ElementMeta`
   envelope (`id`, `kind`, `name`, `role`, `locked`) so layers, properties and
   templates never inspect Fabric internals.
-- **Persistence is an adapter.** LocalStorage today, the same interface can be
-  backed by the API once accounts exist.
+- **Persistence is offline-first.** LocalStorage is the real autosave: it is
+  synchronous, so it still lands when a tab closes, and a network that comes
+  and goes never costs anyone the twenty minutes they just spent on a card.
+  The server sits on top as a copy that follows them to the next device.
+  Conflicts resolve last-write-wins on the document's own `updatedAt` — right
+  for one person editing one card, and not enough the day two people share
+  one, which is why the timestamps belong to the document rather than the row.
 - **Files stay small.** ~300 lines max, one responsibility per module.
 
 ## Backend layout
@@ -136,11 +141,10 @@ id is self-issued by anyone who can set a cookie.
 
 ## Deliberately not built yet
 
-The editor still autosaves to LocalStorage and never calls the designs API, so
-signing in changes the header and nothing else yet — syncing the two is the
-next step. There is no "my designs" screen. Google sign-in, password reset,
-email verification, collaboration, print ordering, payments, template
-marketplace, and templates that carry a matching back. Export still trims at
+A "my designs" screen — the editor syncs one card, the one you last worked on,
+so a second design can only be reached by starting from a blank canvas. Google
+sign-in, password reset, email verification, collaboration, print ordering,
+payments, template marketplace, and templates that carry a matching back. Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.

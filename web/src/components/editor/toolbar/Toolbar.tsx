@@ -2,9 +2,7 @@
 
 import Link from "next/link";
 import {
-  Check,
   ChevronLeft,
-  CloudUpload,
   Copy,
   ClipboardPaste,
   CopyPlus,
@@ -17,6 +15,7 @@ import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
 import { AuthNavAction } from "@/components/auth/AuthNavAction";
 import { DownloadMenu } from "./DownloadMenu";
+import { SaveStatus } from "./SaveStatus";
 import { useEditorStore } from "@/store/editorStore";
 import { useCanvas } from "../canvas/CanvasProvider";
 import { useCanvasActions } from "@/hooks/useCanvasActions";
@@ -26,8 +25,6 @@ export function Toolbar() {
   const t = useT().editor.toolbar;
   const documentName = useEditorStore((state) => state.documentName);
   const setDocumentName = useEditorStore((state) => state.setDocumentName);
-  const isDirty = useEditorStore((state) => state.isDirty);
-  const lastSavedAt = useEditorStore((state) => state.lastSavedAt);
   const { selected, undo, redo, canUndo, canRedo, copy, paste, hasClipboard } =
     useCanvas();
   const { remove, duplicate } = useCanvasActions();
@@ -59,24 +56,7 @@ export function Toolbar() {
           className="h-9 w-52 truncate rounded-md border border-transparent px-2 text-sm font-medium text-ink-800 outline-none transition-colors hover:border-hairline focus:border-brand-400 focus:bg-panel"
         />
 
-        {isDirty || lastSavedAt ? (
-          <span
-            role="status"
-            className="hidden shrink-0 items-center gap-1 text-xs text-ink-400 lg:flex"
-          >
-            {isDirty ? (
-              <>
-                <CloudUpload className="h-3.5 w-3.5 animate-pulse" />
-                {t.saving}
-              </>
-            ) : (
-              <>
-                <Check className="h-3.5 w-3.5" />
-                {t.saved}
-              </>
-            )}
-          </span>
-        ) : null}
+        <SaveStatus />
       </div>
 
       <div className="flex items-center gap-0.5">

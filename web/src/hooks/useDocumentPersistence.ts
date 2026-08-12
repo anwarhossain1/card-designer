@@ -9,10 +9,8 @@ import {
   SAFE_AREA_IN,
   SCHEMA_VERSION,
 } from "@/config/document";
-import { collectFontFamilies, loadScene } from "@/lib/canvas/persistence";
 import { loadDocument, saveDocument } from "@/lib/storage/documentStorage";
-import { getSideScene, normalizeSides } from "@/lib/document/sides";
-import { loadFont } from "@/lib/fonts/loader";
+import { applyDocument } from "@/lib/document/applyDocument";
 import { useEditorStore } from "@/store/editorStore";
 import type { CardSidesState } from "./useCardSides";
 
@@ -40,7 +38,6 @@ export function useDocumentPersistence(
   sides: CardSidesState,
 ): PersistenceState {
   const [isHydrated, setIsHydrated] = useState(false);
-  const createdAtRef = useRef<string>(new Date().toISOString());
   const timerRef = useRef<number | undefined>(undefined);
 
   const documentName = useEditorStore((state) => state.documentName);
@@ -50,20 +47,21 @@ export function useDocumentPersistence(
     const canvas = canvasRef.current;
     if (!canvas) return;
 
-    const { documentId, templateId } = useEditorStore.getState();
+    const { documentId, documentName, documentCreatedAt, templateId } =
+      useEditorStore.getState();
     const now = new Date().toISOString();
 
     const doc: CardDocument = {
       id: documentId,
       schemaVersion: SCHEMA_VERSION,
       kind: "business-card",
-      name: useEditorStore.getState().documentName,
+      name: documentName,
       size: CARD_SIZE_IN,
       bleed: BLEED_IN,
       safeArea: SAFE_AREA_IN,
       templateId,
       sides: collectSides(),
-      createdAt: createdAtRef.current,
+      createdAt: documentCreatedAt,
       updatedAt: now,
     };
 
@@ -84,34 +82,8 @@ export function useDocumentPersistence(
       const stored = loadDocument();
 
       if (stored) {
-        createdAtRef.current = stored.createdAt;
-
-        /*
-         * Both sides go into the cache, but only the front reaches the canvas:
-         * a document always reopens on its front, so the store is pinned there
-         * too rather than trusting an activeSide left over from a previous
-         * mount of this same (module-level) store.
-         */
-        const restored = normalizeSides(stored.sides);
-        seedSides(restored);
-        useEditorStore.getState().setActiveSide("front");
-
-        const scene = getSideScene(restored, "front");
-        if (scene) {
-          // Fonts first, so restored text lays out against the real face.
-          await Promise.all(collectFontFamilies(scene).map(loadFont));
-          if (cancelled) return;
-
-          await loadScene(canvas, scene);
-          if (cancelled) return;
-        }
-
-        useEditorStore.getState().hydrate({
-          documentId: stored.id,
-          documentName: stored.name,
-          templateId: stored.templateId,
-          lastSavedAt: stored.updatedAt,
-        });
+        await applyDocument(canvas, stored, seedSides);
+        if (cancelled) return;
       }
 
       if (!cancelled) setIsHydrated(true);

@@ -1,9 +1,10 @@
 "use client";
 
 import Link from "next/link";
-import { Check, ChevronLeft, CloudUpload, Redo2, Undo2 } from "lucide-react";
+import { ChevronLeft, Redo2, Undo2 } from "lucide-react";
 import { IconButton } from "@/components/ui/IconButton";
 import { DownloadMenu } from "@/components/editor/toolbar/DownloadMenu";
+import { SaveStatus } from "@/components/editor/toolbar/SaveStatus";
 import { useCanvas } from "@/components/editor/canvas/CanvasProvider";
 import { useEditorStore } from "@/store/editorStore";
 import { useT } from "@/components/i18n/I18nProvider";
@@ -16,8 +17,6 @@ export function MobileTopBar() {
   const t = useT().editor.toolbar;
   const documentName = useEditorStore((state) => state.documentName);
   const setDocumentName = useEditorStore((state) => state.setDocumentName);
-  const isDirty = useEditorStore((state) => state.isDirty);
-  const lastSavedAt = useEditorStore((state) => state.lastSavedAt);
   const { undo, redo, canUndo, canRedo } = useCanvas();
 
   return (
@@ -38,17 +37,7 @@ export function MobileTopBar() {
         className="h-11 min-w-0 flex-1 truncate rounded-md border border-transparent bg-transparent px-2 text-sm font-medium text-ink-800 outline-none focus:border-brand-400"
       />
 
-      <span
-        role="status"
-        aria-label={isDirty ? t.saving : t.saved}
-        className="grid w-6 shrink-0 place-items-center text-ink-400"
-      >
-        {isDirty ? (
-          <CloudUpload className="h-4 w-4 animate-pulse" />
-        ) : lastSavedAt ? (
-          <Check className="h-4 w-4" />
-        ) : null}
-      </span>
+      <SaveStatus compact />
 
       <IconButton
         label={t.undo}

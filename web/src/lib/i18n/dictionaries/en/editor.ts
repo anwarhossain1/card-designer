@@ -10,6 +10,8 @@ export const editor = {
     delete: "Delete (Del)",
     saving: "Saving…",
     saved: "Saved",
+    syncing: "Syncing…",
+    savedOnDevice: "Saved on this device",
     download: "Download",
   },
   panels: {

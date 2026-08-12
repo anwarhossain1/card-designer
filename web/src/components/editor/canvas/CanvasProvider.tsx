@@ -9,6 +9,7 @@ import {
 import { useHistory, type HistoryState } from "@/hooks/useHistory";
 import { useClipboard, type ClipboardState } from "@/hooks/useClipboard";
 import { useCardSides, type CardSidesState } from "@/hooks/useCardSides";
+import { useDesignSync, type DesignSyncState } from "@/hooks/useDesignSync";
 import {
   useDocumentPersistence,
   type PersistenceState,
@@ -19,6 +20,7 @@ type CanvasContextValue = EditorCanvasApi &
   HistoryState &
   ClipboardState &
   CardSidesState &
+  DesignSyncState &
   PersistenceState;
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
@@ -36,6 +38,12 @@ export function CanvasProvider({ children }: { children: ReactNode }) {
     canvas.canvasRef,
     canvas.isReady,
     sides,
+  );
+  // Layered on top of the local save, never in place of it.
+  const sync = useDesignSync(
+    canvas.canvasRef,
+    persistence.isHydrated,
+    sides.seedSides,
   );
   /*
    * History waits for hydration so the undo baseline is the restored design,
@@ -56,10 +64,11 @@ export function CanvasProvider({ children }: { children: ReactNode }) {
       ...selection,
       ...sides,
       ...persistence,
+      ...sync,
       ...history,
       ...clipboard,
     }),
-    [canvas, selection, sides, persistence, history, clipboard],
+    [canvas, selection, sides, persistence, sync, history, clipboard],
   );
 
   return (
