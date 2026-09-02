@@ -23,6 +23,15 @@ export class HistoryManager {
   /** Notifies React that canUndo/canRedo may have changed. */
   onChange?: () => void;
 
+  /**
+   * False until a baseline exists. Each card side owns a manager, and a side
+   * being shown again must keep the stack it already built — only a manager
+   * that has never seen a canvas gets reset.
+   */
+  get hasBaseline(): boolean {
+    return this.undoStack.length > 0;
+  }
+
   get canUndo(): boolean {
     return this.undoStack.length > 1;
   }

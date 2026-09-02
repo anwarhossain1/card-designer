@@ -6,6 +6,7 @@ import { Container } from "@/components/ui/Container";
 import { Logo } from "@/components/ui/Logo";
 import { ThemeToggle } from "@/components/ui/ThemeToggle";
 import { LocaleToggle } from "@/components/ui/LocaleToggle";
+import { AuthNavAction } from "@/components/auth/AuthNavAction";
 import { useT } from "@/components/i18n/I18nProvider";
 
 export function Navbar() {
@@ -37,6 +38,7 @@ export function Navbar() {
         <div className="flex items-center gap-1.5">
           <LocaleToggle compact />
           <ThemeToggle size="sm" />
+          <AuthNavAction />
           <Link href="/editor">
             <Button size="sm">{t.landing.nav.startDesigning}</Button>
           </Link>

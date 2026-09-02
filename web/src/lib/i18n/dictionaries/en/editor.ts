@@ -10,6 +10,8 @@ export const editor = {
     delete: "Delete (Del)",
     saving: "Saving…",
     saved: "Saved",
+    syncing: "Syncing…",
+    savedOnDevice: "Saved on this device",
     download: "Download",
   },
   panels: {
@@ -20,6 +22,7 @@ export const editor = {
     icons: "Icons",
     background: "Background",
     qr: "QR Code",
+    data: "Data",
     layers: "Layers",
     close: "Close panel",
     toolsLabel: "Editor tools",
@@ -40,11 +43,28 @@ export const editor = {
     dropHere: "Drop to add to the card",
     loading: "Loading editor…",
   },
+  sides: {
+    label: "Card side",
+    front: "Front",
+    back: "Back",
+  },
   templates: {
     replaceWarning:
       "Applying a template replaces what is on the card. Undo brings your design back.",
     inUse: "in use",
     blank: "Start from blank",
+  },
+  data: {
+    intro:
+      "Fields are placeholders filled from a spreadsheet — design once, then generate a card per row.",
+    customLabel: "Custom field",
+    customPlaceholder: "e.g. blood_group",
+    add: "Add",
+    addQr: "Add data QR",
+    qrHint:
+      "A QR that encodes each row's value for this field — scan a card, get that student's ID.",
+    generateHint:
+      "When the design is ready, use “Generate from data” in the toolbar to upload your spreadsheet.",
   },
   text: {
     addBox: "Add a text box",
@@ -192,12 +212,23 @@ export const editor = {
     png: { label: "PNG", hint: "Sharp, supports transparency" },
     jpeg: { label: "JPEG", hint: "Smaller file, solid background" },
     pdf: { label: "PDF", hint: "Print-ready, 300 DPI" },
+    scope: "Sides",
+    scopes: {
+      front: "Front only",
+      back: "Back only",
+      both: "Both sides",
+    },
+    backEmpty: "The back is still blank — it will come out as a plain card.",
     quality: "Quality",
     resolution: "Export resolution",
     dpiStandard: "Standard (96 DPI)",
     dpiLarge: "Large (192 DPI)",
     dpiPrint: "Print (300 DPI)",
     transparent: "Transparent background",
+    printMarks: "Bleed and crop marks",
+    printMarksHint: "For a print shop — adds 0.25 in around the card.",
+    safeAreaWarning:
+      "Something sits close to the edge and may be trimmed off. Move it inside the safe-area guide.",
     preparing: "Preparing…",
     action: (format: string) => `Download ${format}`,
     failed: "Export failed — try again.",

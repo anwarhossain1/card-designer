@@ -9,6 +9,7 @@ import {
 } from "react";
 import type { Canvas } from "fabric";
 import { HistoryManager } from "@/lib/canvas/history";
+import type { SideId } from "@/types/document";
 
 /** Merges rapid-fire events (slider drags, typing) into one undo step. */
 const CAPTURE_DEBOUNCE_MS = 200;
@@ -24,15 +25,24 @@ export interface HistoryState {
  * Binds the history manager to canvas mutation events. Everything that changes
  * the scene — adds, removes, transforms, property edits, reorders — funnels
  * through `object:*`/`text:changed`, so capturing here catches all of it.
+ *
+ * Each side keeps its own manager. One shared stack would let an undo on the
+ * back restore a snapshot of the front, because a snapshot is the whole canvas
+ * and the canvas is whichever side is showing.
  */
 export function useHistory(
   canvasRef: RefObject<Canvas | null>,
   isReady: boolean,
   refresh: () => void,
+  side: SideId,
 ): HistoryState {
-  const managerRef = useRef<HistoryManager | null>(null);
-  if (!managerRef.current) managerRef.current = new HistoryManager();
-  const manager = managerRef.current;
+  const managersRef = useRef(new Map<SideId, HistoryManager>());
+
+  let manager = managersRef.current.get(side);
+  if (!manager) {
+    manager = new HistoryManager();
+    managersRef.current.set(side, manager);
+  }
 
   const [, bump] = useReducer((count: number) => count + 1, 0);
 
@@ -41,7 +51,10 @@ export function useHistory(
     if (!canvas || !isReady) return;
 
     manager.onChange = bump;
-    manager.reset(canvas);
+    // A first visit needs the loaded scene as its baseline; a return visit
+    // already has one, and resetting would throw away that side's undo stack.
+    if (manager.hasBaseline) bump();
+    else manager.reset(canvas);
 
     let timer: number | undefined;
     const schedule = () => {

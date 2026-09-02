@@ -36,6 +36,12 @@ export interface ElementMeta {
   name: string;
   role: FieldRole;
   locked: boolean;
+  /**
+   * Column key this element is bound to for batch generation ("roll",
+   * "class"). Absent on ordinary elements. Rides inside `meta`, so saved
+   * designs carry bindings with no storage changes.
+   */
+  fieldKey?: string;
 }
 
 export type ShapeVariant =

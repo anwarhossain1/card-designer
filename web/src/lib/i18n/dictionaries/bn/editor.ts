@@ -12,6 +12,8 @@ export const editor: Dictionary["editor"] = {
     delete: "মুছে ফেলুন (Del)",
     saving: "সেভ হচ্ছে…",
     saved: "সেভ হয়েছে",
+    syncing: "সিঙ্ক হচ্ছে…",
+    savedOnDevice: "এই ডিভাইসে সেভ আছে",
     download: "ডাউনলোড",
   },
   panels: {
@@ -22,6 +24,7 @@ export const editor: Dictionary["editor"] = {
     icons: "আইকন",
     background: "ব্যাকগ্রাউন্ড",
     qr: "QR কোড",
+    data: "ডেটা",
     layers: "লেয়ার",
     close: "প্যানেল বন্ধ করুন",
     toolsLabel: "এডিটর টুল",
@@ -42,11 +45,28 @@ export const editor: Dictionary["editor"] = {
     dropHere: "কার্ডে যোগ করতে ছেড়ে দিন",
     loading: "এডিটর লোড হচ্ছে…",
   },
+  sides: {
+    label: "কার্ডের দিক",
+    front: "সামনে",
+    back: "পিছনে",
+  },
   templates: {
     replaceWarning:
       "টেমপ্লেট বসালে কার্ডে যা আছে তা বদলে যাবে। আন্ডু করলে ডিজাইন ফিরে আসবে।",
     inUse: "ব্যবহৃত",
     blank: "খালি কার্ড থেকে শুরু",
+  },
+  data: {
+    intro:
+      "ফিল্ড হলো স্প্রেডশিট থেকে পূরণ হওয়া প্লেসহোল্ডার — একবার ডিজাইন করুন, তারপর প্রতিটি সারির জন্য একটি করে কার্ড তৈরি করুন।",
+    customLabel: "কাস্টম ফিল্ড",
+    customPlaceholder: "যেমন blood_group",
+    add: "যোগ করুন",
+    addQr: "ডেটা QR যোগ করুন",
+    qrHint:
+      "এই QR প্রতিটি সারির মান বহন করে — কার্ড স্ক্যান করলেই সেই শিক্ষার্থীর আইডি পাওয়া যাবে।",
+    generateHint:
+      "ডিজাইন প্রস্তুত হলে টুলবারের “ডেটা থেকে তৈরি করুন” দিয়ে আপনার স্প্রেডশিট আপলোড করুন।",
   },
   text: {
     addBox: "লেখার বাক্স যোগ করুন",
@@ -201,12 +221,23 @@ export const editor: Dictionary["editor"] = {
     png: { label: "PNG", hint: "ঝকঝকে, স্বচ্ছতা সমর্থন করে" },
     jpeg: { label: "JPEG", hint: "ছোট ফাইল, একরঙা ব্যাকগ্রাউন্ড" },
     pdf: { label: "PDF", hint: "প্রিন্ট-রেডি, ৩০০ DPI" },
+    scope: "কোন দিক",
+    scopes: {
+      front: "শুধু সামনের দিক",
+      back: "শুধু পিছনের দিক",
+      both: "দুই দিকই",
+    },
+    backEmpty: "পিছনের দিক এখনো খালি — এটি সাদা কার্ড হয়েই আসবে।",
     quality: "মান",
     resolution: "এক্সপোর্ট রেজল্যুশন",
     dpiStandard: "সাধারণ (৯৬ DPI)",
     dpiLarge: "বড় (১৯২ DPI)",
     dpiPrint: "প্রিন্ট (৩০০ DPI)",
     transparent: "স্বচ্ছ ব্যাকগ্রাউন্ড",
+    printMarks: "ব্লিড ও ক্রপ মার্ক",
+    printMarksHint: "প্রিন্টের দোকানের জন্য — কার্ডের চারপাশে ০.২৫ ইঞ্চি যোগ হয়।",
+    safeAreaWarning:
+      "কিছু জিনিস কিনারার খুব কাছে আছে, কাটার সময় বাদ পড়তে পারে। সেফ এরিয়ার ভেতরে সরান।",
     preparing: "প্রস্তুত হচ্ছে…",
     action: (format: string) => `${format} ডাউনলোড করুন`,
     failed: "এক্সপোর্ট ব্যর্থ হয়েছে — আবার চেষ্টা করুন।",

@@ -19,17 +19,24 @@ export const getQrConfig = (object: FabricObject): QrConfig | null =>
  * QR codes are rendered as vectors, not images: a raster code resampled at
  * 300 DPI is exactly how unscannable prints happen.
  */
-async function buildQrObject(config: QrConfig): Promise<FabricObject | null> {
-  const payload = encodeQrPayload(config);
-  if (!payload) return null;
-
+/**
+ * Renders any payload verbatim — batch generation encodes raw roster values
+ * (a student id must stay a student id, with no URL scheme guessed on).
+ */
+export async function buildQrArtwork(
+  payload: string,
+  style: Pick<
+    QrConfig,
+    "margin" | "darkColor" | "lightColor" | "transparentBackground"
+  >,
+): Promise<FabricObject | null> {
   const svg = await QRCode.toString(payload, {
     type: "svg",
-    margin: config.margin,
+    margin: style.margin,
     errorCorrectionLevel: "M",
     color: {
-      dark: config.darkColor,
-      light: config.transparentBackground ? "#ffffff00" : config.lightColor,
+      dark: style.darkColor,
+      light: style.transparentBackground ? "#ffffff00" : style.lightColor,
     },
   });
 
@@ -38,6 +45,12 @@ async function buildQrObject(config: QrConfig): Promise<FabricObject | null> {
   if (parts.length === 0) return null;
 
   return util.groupSVGElements(parts);
+}
+
+async function buildQrObject(config: QrConfig): Promise<FabricObject | null> {
+  const payload = encodeQrPayload(config);
+  if (!payload) return null;
+  return buildQrArtwork(payload, config);
 }
 
 export async function createQrElement(

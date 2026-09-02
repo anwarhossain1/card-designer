@@ -6,6 +6,7 @@ import { useKeyboardShortcuts } from "@/hooks/useKeyboardShortcuts";
 import { useTemplateDeepLink } from "@/hooks/useTemplateDeepLink";
 import { CanvasProvider, useCanvas } from "./canvas/CanvasProvider";
 import { CanvasStage } from "./canvas/CanvasStage";
+import { SideSwitcher } from "./canvas/SideSwitcher";
 import { PropertiesPanel } from "./properties/PropertiesPanel";
 import { PanelDrawer } from "./sidebar/PanelDrawer";
 import { SidebarRail } from "./sidebar/SidebarRail";
@@ -66,6 +67,8 @@ function EditorLayout() {
         <CanvasStage key="stage" isCompact={isCompact} />
 
         {isCompact ? null : <PropertiesPanel key="properties" />}
+        {/* The compact shell has no zoom bar, so the switcher floats instead. */}
+        {isCompact ? <SideSwitcher key="sides" variant="floating" /> : null}
         {isCompact ? <MobileZoomPill key="zoom" /> : null}
       </div>
 

@@ -1,5 +1,6 @@
 import type { CardDocument } from "@/types/document";
 import { SCHEMA_VERSION } from "@/config/document";
+import { normalizeSides } from "@/lib/document/sides";
 
 /**
  * LocalStorage persistence adapter.
@@ -12,11 +13,11 @@ const STORAGE_KEY = "cardcraft.document";
 /** Holds a document this build cannot read, so a newer build can recover it. */
 const BACKUP_KEY = "cardcraft.document.unreadable";
 
-/**
- * Per-version migrations, applied in order when loading an older document.
- * v1 is the first shipped format, so the map starts empty.
- */
-const MIGRATIONS: Record<number, (doc: CardDocument) => CardDocument> = {};
+/** Per-version migrations, applied in order when loading an older document. */
+const MIGRATIONS: Record<number, (doc: CardDocument) => CardDocument> = {
+  /** v1 documents are front-only; give them the blank back v2 assumes. */
+  1: (doc) => ({ ...doc, sides: normalizeSides(doc.sides) }),
+};
 
 function migrate(doc: CardDocument): CardDocument {
   let current = doc;
@@ -63,7 +64,10 @@ export function loadDocument(): CardDocument | null {
       return null;
     }
 
-    return migrate(parsed);
+    const doc = migrate(parsed);
+    // Belt and braces: a document at the current version still has to satisfy
+    // the front-then-back invariant before the editor trusts it.
+    return { ...doc, sides: normalizeSides(doc.sides) };
   } catch {
     return null;
   }

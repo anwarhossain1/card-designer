@@ -29,6 +29,9 @@ export async function apiRequest<T>(
 ): Promise<T> {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     ...init,
+    // The session is httpOnly cookies, and the API is a different origin, so
+    // the browser needs telling to send them.
+    credentials: "include",
     headers: {
       "Content-Type": "application/json",
       ...headers,

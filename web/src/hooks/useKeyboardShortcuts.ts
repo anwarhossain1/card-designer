@@ -17,7 +17,7 @@ const isTypingTarget = (target: EventTarget | null) =>
  * element is being edited in place, so typing always wins.
  */
 export function useKeyboardShortcuts() {
-  const { canvasRef, undo, redo, copy, cut, paste } = useCanvas();
+  const { canvasRef, undo, redo, copy, cut, paste, switchSide } = useCanvas();
   const { remove, duplicate, nudge, deselect } = useCanvasActions();
 
   useEffect(() => {
@@ -32,6 +32,14 @@ export function useKeyboardShortcuts() {
       const modifier = event.ctrlKey || event.metaKey;
       const hasSelection = canvas.getActiveObjects().length > 0;
       const step = event.shiftKey ? NUDGE_LARGE : NUDGE;
+
+      // Ctrl+PageUp/PageDown moves between pages elsewhere; with two sides it
+      // reads as "the one before" and "the one after".
+      if (modifier && (event.key === "PageUp" || event.key === "PageDown")) {
+        event.preventDefault();
+        void switchSide(event.key === "PageUp" ? "front" : "back");
+        return;
+      }
 
       if (modifier) {
         switch (event.key.toLowerCase()) {
@@ -96,5 +104,17 @@ export function useKeyboardShortcuts() {
 
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);
-  }, [canvasRef, copy, cut, deselect, duplicate, nudge, paste, redo, remove, undo]);
+  }, [
+    canvasRef,
+    copy,
+    cut,
+    deselect,
+    duplicate,
+    nudge,
+    paste,
+    redo,
+    remove,
+    switchSide,
+    undo,
+  ]);
 }

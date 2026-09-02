@@ -8,6 +8,8 @@ import {
 } from "@/hooks/useCanvasSelection";
 import { useHistory, type HistoryState } from "@/hooks/useHistory";
 import { useClipboard, type ClipboardState } from "@/hooks/useClipboard";
+import { useCardSides, type CardSidesState } from "@/hooks/useCardSides";
+import { useDesignSync, type DesignSyncState } from "@/hooks/useDesignSync";
 import {
   useDocumentPersistence,
   type PersistenceState,
@@ -17,6 +19,8 @@ type CanvasContextValue = EditorCanvasApi &
   SelectionState &
   HistoryState &
   ClipboardState &
+  CardSidesState &
+  DesignSyncState &
   PersistenceState;
 
 const CanvasContext = createContext<CanvasContextValue | null>(null);
@@ -29,18 +33,42 @@ const CanvasContext = createContext<CanvasContextValue | null>(null);
 export function CanvasProvider({ children }: { children: ReactNode }) {
   const canvas = useEditorCanvas();
   const selection = useCanvasSelection(canvas.canvasRef, canvas.isReady);
-  const persistence = useDocumentPersistence(canvas.canvasRef, canvas.isReady);
-  // History waits for hydration so the undo baseline is the restored design.
+  const sides = useCardSides(canvas.canvasRef, selection.refresh);
+  const persistence = useDocumentPersistence(
+    canvas.canvasRef,
+    canvas.isReady,
+    sides,
+  );
+  // Layered on top of the local save, never in place of it.
+  const sync = useDesignSync(
+    canvas.canvasRef,
+    persistence.isHydrated,
+    sides.seedSides,
+  );
+  /*
+   * History waits for hydration so the undo baseline is the restored design,
+   * and stands down mid-swap so the clear-then-load of a side switch is never
+   * mistaken for the user deleting everything and drawing it again.
+   */
   const history = useHistory(
     canvas.canvasRef,
-    canvas.isReady && persistence.isHydrated,
+    canvas.isReady && persistence.isHydrated && !sides.isSwitchingSide,
     selection.refresh,
+    sides.activeSide,
   );
   const clipboard = useClipboard(canvas.canvasRef, selection.refresh);
 
   const value = useMemo(
-    () => ({ ...canvas, ...selection, ...persistence, ...history, ...clipboard }),
-    [canvas, selection, persistence, history, clipboard],
+    () => ({
+      ...canvas,
+      ...selection,
+      ...sides,
+      ...persistence,
+      ...sync,
+      ...history,
+      ...clipboard,
+    }),
+    [canvas, selection, sides, persistence, sync, history, clipboard],
   );
 
   return (

@@ -1,9 +1,22 @@
 "use client";
 
-import { Grid3x3, Monitor, Moon, Ruler, Square, Sun } from "lucide-react";
+import Link from "next/link";
+import {
+  Grid3x3,
+  LayoutGrid,
+  Loader2,
+  LogIn,
+  LogOut,
+  Monitor,
+  Moon,
+  Ruler,
+  Square,
+  Sun,
+} from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useUiStore } from "@/store/uiStore";
 import { useTheme } from "@/hooks/useTheme";
+import { useLogout, useSession } from "@/hooks/useSession";
 import { useI18n, useT } from "@/components/i18n/I18nProvider";
 import { LOCALE_LABELS, LOCALES } from "@/lib/i18n/config";
 import type { ThemePreference } from "@/lib/theme/theme";
@@ -30,6 +43,8 @@ export function MoreSheetContent() {
 
   return (
     <div className="space-y-5 pt-1">
+      <AccountSection />
+
       <Section title={t.mobileUi.view}>
         {guides.map((guide) => (
           <Row
@@ -67,6 +82,63 @@ export function MoreSheetContent() {
 
       <p className="px-1 text-[11px] text-ink-400">{t.mobileUi.rotateHint}</p>
     </div>
+  );
+}
+
+/**
+ * The phone chrome has no room for an avatar, so the account lives here —
+ * signed out it is one link, signed in it is who you are plus the way out.
+ */
+function AccountSection() {
+  const dictionary = useT();
+  const t = dictionary.auth;
+  const { user, isPending } = useSession();
+  const signOut = useLogout();
+
+  if (isPending) return null;
+
+  return (
+    <Section title={t.nav.account}>
+      <Link
+        href="/designs"
+        className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-sm text-ink-700 transition-colors active:bg-ink-100"
+      >
+        <LayoutGrid className="h-4 w-4" />
+        {dictionary.designs.title}
+      </Link>
+
+      {user ? (
+        <>
+          <div className="px-3 py-1">
+            <p className="truncate text-sm font-medium text-ink-900">
+              {user.name}
+            </p>
+            <p className="truncate text-xs text-ink-500">{user.email}</p>
+          </div>
+          <button
+            type="button"
+            disabled={signOut.isPending}
+            onClick={() => signOut.mutate()}
+            className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-sm text-ink-700 transition-colors active:bg-ink-100 disabled:opacity-60"
+          >
+            {signOut.isPending ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <LogOut className="h-4 w-4" />
+            )}
+            {signOut.isPending ? t.nav.signingOut : t.nav.signOut}
+          </button>
+        </>
+      ) : (
+        <Link
+          href="/sign-in?next=%2Feditor"
+          className="flex min-h-[48px] w-full items-center gap-3 rounded-lg px-3 text-sm text-ink-700 transition-colors active:bg-ink-100"
+        >
+          <LogIn className="h-4 w-4" />
+          {t.nav.signIn}
+        </Link>
+      )}
+    </Section>
   );
 }
 
