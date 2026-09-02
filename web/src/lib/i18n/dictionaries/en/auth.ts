@@ -25,7 +25,7 @@ export const auth = {
   },
   fields: {
     name: "Full name",
-    namePlaceholder: "Anwar Hossain",
+    namePlaceholder: "Tanvir Ahmed",
     email: "Email",
     emailPlaceholder: "you@example.com",
     password: "Password",

@@ -27,7 +27,7 @@ export const auth: Dictionary["auth"] = {
   },
   fields: {
     name: "পুরো নাম",
-    namePlaceholder: "আনোয়ার হোসেন",
+    namePlaceholder: "তানভীর আহমেদ",
     email: "ইমেইল",
     emailPlaceholder: "you@example.com",
     password: "পাসওয়ার্ড",

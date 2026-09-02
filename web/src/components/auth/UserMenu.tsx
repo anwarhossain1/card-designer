@@ -8,7 +8,7 @@ import { useT } from "@/components/i18n/I18nProvider";
 import { useLogout } from "@/hooks/useSession";
 import type { AuthUser } from "@/lib/api/auth";
 
-/** First letters of the first two words — "Anwar Hossain" becomes AH. */
+/** First letters of the first two words — "Tanvir Ahmed" becomes TA. */
 function initials(name: string): string {
   const letters = name
     .trim()
