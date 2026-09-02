@@ -23,6 +23,10 @@ export const register = (body: Registration) =>
 export const login = (body: Credentials) =>
   apiRequest<AuthUser>("/auth/login", { method: "POST", body });
 
+/** `credential` is the ID token Google Identity Services minted in-browser. */
+export const loginWithGoogle = (body: { credential: string }) =>
+  apiRequest<AuthUser>("/auth/google", { method: "POST", body });
+
 export const logout = () =>
   apiRequest<{ signedOut: boolean }>("/auth/logout", { method: "POST" });
 

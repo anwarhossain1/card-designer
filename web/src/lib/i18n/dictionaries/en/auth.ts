@@ -72,6 +72,12 @@ export const auth = {
     requestNew: "Request a new link",
     missingToken: "This link is incomplete. Request a new one.",
   },
+  google: {
+    divider: "or",
+    /** Shown when the server has no GOOGLE_CLIENT_ID configured. */
+    unavailable: "Google sign-in is not available right now.",
+    failed: "Google sign-in did not go through. Try again.",
+  },
   /** Designs are still on this device until saved projects land. */
   localNote:
     "Your current design stays in this browser for now — signing in does not move it yet.",

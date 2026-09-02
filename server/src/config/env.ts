@@ -22,6 +22,12 @@ const schema = z.object({
   SMTP_USER: z.string().optional(),
   SMTP_PASS: z.string().optional(),
   MAIL_FROM_NAME: z.string().default("CardCraft"),
+  /**
+   * OAuth client id for "Sign in with Google". Optional: without it the
+   * endpoint answers 503 and the web app hides the button, so password auth
+   * keeps working unchanged.
+   */
+  GOOGLE_CLIENT_ID: z.string().optional(),
 });
 
 const withMailCheck = schema.refine(

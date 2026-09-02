@@ -4,9 +4,11 @@ import {
   ForbiddenException,
   Injectable,
   Logger,
+  ServiceUnavailableException,
   UnauthorizedException,
 } from "@nestjs/common";
 import bcrypt from "bcrypt";
+import { OAuth2Client } from "google-auth-library";
 import { env } from "../../config/env";
 import { MailService } from "../mail/mail.service";
 import {
@@ -43,6 +45,16 @@ export interface Session {
 export class AuthService {
   private readonly logger = new Logger(AuthService.name);
 
+  /**
+   * Null when GOOGLE_CLIENT_ID is unset — the endpoint then refuses cleanly
+   * instead of verifying tokens against no audience. The client caches
+   * Google's signing keys between calls, which is why it is built once here
+   * rather than per request.
+   */
+  private readonly googleClient = env.GOOGLE_CLIENT_ID
+    ? new OAuth2Client(env.GOOGLE_CLIENT_ID)
+    : null;
+
   constructor(
     private readonly users: UsersService,
     private readonly tokens: TokensService,
@@ -65,6 +77,71 @@ export class AuthService {
 
     if (!user || !matches) {
       throw new UnauthorizedException("Invalid email or password");
+    }
+
+    if (!user.isActive) {
+      throw new ForbiddenException("This account has been suspended");
+    }
+
+    return this.issue(user, userAgent);
+  }
+
+  /**
+   * Exchanges a Google ID token for a CardCraft session.
+   *
+   * The token is verified against Google's published keys and our client id —
+   * the browser is not trusted about who signed in, only Google's signature
+   * is. Google's `sub` is the durable key; email is matched second, so an
+   * account registered by password picks up its googleId on first Google
+   * sign-in instead of splitting into a twin.
+   */
+  async loginWithGoogle(credential: string, userAgent?: string): Promise<Session> {
+    if (!this.googleClient || !env.GOOGLE_CLIENT_ID) {
+      throw new ServiceUnavailableException(
+        "Google sign-in is not configured on this server",
+      );
+    }
+
+    let payload;
+    try {
+      const ticket = await this.googleClient.verifyIdToken({
+        idToken: credential,
+        audience: env.GOOGLE_CLIENT_ID,
+      });
+      payload = ticket.getPayload();
+    } catch {
+      throw new UnauthorizedException("Google sign-in could not be verified");
+    }
+
+    if (!payload?.sub || !payload.email) {
+      throw new UnauthorizedException("Google sign-in could not be verified");
+    }
+
+    // An unverified address must not claim the account that owns it here.
+    if (!payload.email_verified) {
+      throw new UnauthorizedException(
+        "This Google account's email is not verified",
+      );
+    }
+
+    const email = payload.email.toLowerCase();
+
+    let user = await this.users.findByGoogleId(payload.sub);
+
+    if (!user) {
+      const existing = await this.users.findByEmail(email);
+      if (existing) {
+        await this.users.linkGoogleAccount(existing._id.toString(), payload.sub);
+        user = existing;
+      } else {
+        user = await this.users.createFromGoogle({
+          // Google always sends `name` for the ID token flow, but nothing in
+          // the spec promises it; the local part beats rejecting the sign-in.
+          name: (payload.name ?? email.split("@")[0] ?? "User").slice(0, 80),
+          email,
+          googleId: payload.sub,
+        });
+      }
     }
 
     if (!user.isActive) {

@@ -74,6 +74,12 @@ export const auth: Dictionary["auth"] = {
     requestNew: "নতুন লিংক চান",
     missingToken: "লিংকটি অসম্পূর্ণ। নতুন একটি লিংক নিন।",
   },
+  google: {
+    divider: "অথবা",
+    /** Shown when the server has no GOOGLE_CLIENT_ID configured. */
+    unavailable: "গুগল সাইন-ইন এই মুহূর্তে পাওয়া যাচ্ছে না।",
+    failed: "গুগল সাইন-ইন সম্পন্ন হয়নি। আবার চেষ্টা করুন।",
+  },
   localNote:
     "আপনার এখনকার ডিজাইন আপাতত এই ব্রাউজারেই থাকছে — সাইন ইন করলে এটি এখনো সরে যায় না।",
   backHome: "হোমে ফিরে যান",

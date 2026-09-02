@@ -31,9 +31,21 @@ export class User {
   @Prop({ required: true, unique: true, lowercase: true, trim: true })
   email!: string;
 
-  /** `select: false` so no query returns the hash by accident. */
-  @Prop({ required: true, select: false })
-  passwordHash!: string;
+  /**
+   * `select: false` so no query returns the hash by accident. Optional since
+   * Google sign-in landed: an account created from a Google profile has no
+   * password until its owner sets one through the reset flow.
+   */
+  @Prop({ type: String, select: false })
+  passwordHash?: string;
+
+  /**
+   * Google's stable `sub` claim — the only durable key Google offers, since
+   * an email can move between Google accounts. Present only on accounts that
+   * have signed in with Google at least once.
+   */
+  @Prop({ type: String, default: null })
+  googleId!: string | null;
 
   @Prop({ type: String, enum: USER_ROLES, default: "user" })
   role!: UserRole;
@@ -78,4 +90,14 @@ export const UserSchema = SchemaFactory.createForClass(User);
 UserSchema.index(
   { passwordResetTokenHash: 1 },
   { partialFilterExpression: { passwordResetTokenHash: { $type: "string" } } },
+);
+
+// Unique per the same partial-not-sparse reasoning: most accounts have no
+// googleId, and two explicit nulls must not collide.
+UserSchema.index(
+  { googleId: 1 },
+  {
+    unique: true,
+    partialFilterExpression: { googleId: { $type: "string" } },
+  },
 );

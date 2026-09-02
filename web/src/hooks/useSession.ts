@@ -4,6 +4,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchSession,
   login,
+  loginWithGoogle,
   logout,
   register,
   type AuthUser,
@@ -42,6 +43,7 @@ function useAuthMutation<TInput>(
 
 export const useLogin = () => useAuthMutation(login);
 export const useRegister = () => useAuthMutation(register);
+export const useGoogleLogin = () => useAuthMutation(loginWithGoogle);
 
 export function useLogout() {
   const queryClient = useQueryClient();

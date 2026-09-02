@@ -28,10 +28,12 @@ import { AuthService, type Session } from "./auth.service";
 import { TokensService } from "./tokens.service";
 import {
   forgotPasswordSchema,
+  googleLoginSchema,
   loginSchema,
   registerSchema,
   resetPasswordSchema,
   type ForgotPasswordInput,
+  type GoogleLoginInput,
   type LoginInput,
   type RegisterInput,
   type ResetPasswordInput,
@@ -77,6 +79,23 @@ export class AuthController {
     @Res({ passthrough: true }) response: Response,
   ) {
     const session = await this.auth.login(body, request.get("user-agent"));
+    await this.claimGuestWork(request, response, session.user.id);
+    return this.respond(response, session);
+  }
+
+  /** One endpoint for both sign-in and sign-up: Google vouches either way. */
+  @Public()
+  @Post("google")
+  @HttpCode(HttpStatus.OK)
+  async google(
+    @Body(new ZodValidationPipe(googleLoginSchema)) body: GoogleLoginInput,
+    @Req() request: Request,
+    @Res({ passthrough: true }) response: Response,
+  ) {
+    const session = await this.auth.loginWithGoogle(
+      body.credential,
+      request.get("user-agent"),
+    );
     await this.claimGuestWork(request, response, session.user.id);
     return this.respond(response, session);
   }

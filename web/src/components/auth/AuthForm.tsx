@@ -9,6 +9,7 @@ import { useT } from "@/components/i18n/I18nProvider";
 import { useLogin, useRegister, useSession } from "@/hooks/useSession";
 import { ApiError } from "@/lib/api/client";
 import { AuthField } from "./AuthField";
+import { GoogleSignInButton } from "./GoogleSignInButton";
 
 type Mode = "sign-in" | "sign-up";
 type FieldName = "name" | "email" | "password" | "form";
@@ -83,6 +84,14 @@ export function AuthForm({ mode }: { mode: Mode }) {
       default:
         return t.errors.generic;
     }
+  };
+
+  /** 401 from /auth/google is a broken token exchange, not a wrong password. */
+  const googleMessageFor = (error: unknown): string => {
+    if (!(error instanceof ApiError)) return t.errors.offline;
+    if (error.status === 403) return t.errors.suspended;
+    if (error.status === 503) return t.google.unavailable;
+    return t.google.failed;
   };
 
   const submit = async (event: FormEvent) => {
@@ -199,6 +208,12 @@ export function AuthForm({ mode }: { mode: Mode }) {
           {isBusy ? copy.busy : copy.submit}
         </Button>
       </form>
+
+      <GoogleSignInButton
+        mode={mode}
+        onSignedIn={() => router.replace(destination)}
+        onError={(error) => setErrors({ form: googleMessageFor(error) })}
+      />
 
       <p className="mt-6 text-center text-sm text-ink-500">
         {copy.switchPrompt}{" "}

@@ -67,6 +67,24 @@ export class UsersService {
     return this.users.findOne({ email }).select("+passwordHash").exec();
   }
 
+  findByGoogleId(googleId: string) {
+    return this.users.findOne({ googleId }).exec();
+  }
+
+  /**
+   * An account born from a Google profile. No passwordHash at all — the reset
+   * flow is how its owner adds one later, and a random throwaway hash here
+   * would only pretend otherwise.
+   */
+  createFromGoogle(input: { name: string; email: string; googleId: string }) {
+    return this.users.create(input);
+  }
+
+  /** First Google sign-in on an account that already existed by email. */
+  async linkGoogleAccount(userId: string, googleId: string): Promise<void> {
+    await this.users.updateOne({ _id: userId }, { $set: { googleId } }).exec();
+  }
+
   findByEmail(email: string) {
     return this.users.findOne({ email }).exec();
   }
