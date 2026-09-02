@@ -8,6 +8,7 @@ export type PanelId =
   | "icons"
   | "background"
   | "qr"
+  | "data"
   | "layers";
 
 export interface ViewOptions {

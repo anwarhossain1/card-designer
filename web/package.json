@@ -14,12 +14,14 @@
     "clsx": "^2.1.1",
     "fabric": "^6.5.4",
     "jspdf": "^2.5.2",
+    "jszip": "^3.10.1",
     "lucide-react": "^0.469.0",
     "next": "^15.5.4",
     "qrcode": "^1.5.4",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "tailwind-merge": "^2.6.0",
+    "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz",
     "zustand": "^5.0.2"
   },
   "devDependencies": {

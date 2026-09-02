@@ -6,6 +6,7 @@ import { LayersPanel } from "./panels/LayersPanel";
 import { UploadsPanel } from "./panels/UploadsPanel";
 import { BackgroundPanel } from "./panels/BackgroundPanel";
 import { QrPanel } from "./panels/QrPanel";
+import { DataPanel } from "./panels/DataPanel";
 import { TemplatesPanel } from "./panels/TemplatesPanel";
 
 /**
@@ -21,5 +22,6 @@ export const PANEL_CONTENT: Record<PanelId, () => React.JSX.Element> = {
   icons: IconsPanel,
   background: BackgroundPanel,
   qr: QrPanel,
+  data: DataPanel,
   layers: LayersPanel,
 };

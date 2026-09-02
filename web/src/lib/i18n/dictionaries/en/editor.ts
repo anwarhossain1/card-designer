@@ -22,6 +22,7 @@ export const editor = {
     icons: "Icons",
     background: "Background",
     qr: "QR Code",
+    data: "Data",
     layers: "Layers",
     close: "Close panel",
     toolsLabel: "Editor tools",
@@ -52,6 +53,18 @@ export const editor = {
       "Applying a template replaces what is on the card. Undo brings your design back.",
     inUse: "in use",
     blank: "Start from blank",
+  },
+  data: {
+    intro:
+      "Fields are placeholders filled from a spreadsheet — design once, then generate a card per row.",
+    customLabel: "Custom field",
+    customPlaceholder: "e.g. blood_group",
+    add: "Add",
+    addQr: "Add data QR",
+    qrHint:
+      "A QR that encodes each row's value for this field — scan a card, get that student's ID.",
+    generateHint:
+      "When the design is ready, use “Generate from data” in the toolbar to upload your spreadsheet.",
   },
   text: {
     addBox: "Add a text box",

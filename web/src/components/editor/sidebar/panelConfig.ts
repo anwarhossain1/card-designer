@@ -1,4 +1,5 @@
 import {
+  Database,
   Image as ImageIcon,
   LayoutTemplate,
   Layers,
@@ -25,6 +26,7 @@ export const PANELS: PanelDefinition[] = [
   { id: "icons", icon: Smile },
   { id: "background", icon: Palette },
   { id: "qr", icon: QrCode },
+  { id: "data", icon: Database },
   { id: "layers", icon: Layers },
 ];
 

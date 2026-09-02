@@ -18,7 +18,8 @@ import {
 } from "@/lib/canvas/elements/icon";
 import { createImageElement } from "@/lib/canvas/elements/image";
 import { createQrElement, updateQrElement } from "@/lib/canvas/elements/qr";
-import type { QrConfig } from "@/lib/qr/config";
+import { getMeta } from "@/lib/canvas/meta";
+import { DEFAULT_QR_CONFIG, type QrConfig } from "@/lib/qr/config";
 import type { FabricObject } from "fabric";
 import {
   applyBackground,
@@ -52,6 +53,56 @@ export function useCanvasActions() {
       addElement(canvas, element);
       element.initDimensions();
       canvas.requestRenderAll();
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  /**
+   * A text element bound to a roster column for batch generation. The chip
+   * text `{{key}}` is real, styleable text — what you style is what every
+   * generated card gets.
+   */
+  const addDataField = useCallback(
+    async (key: string) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      await loadFont(DEFAULT_FONT_FAMILY);
+
+      const element = createTextElement("custom", `{{${key}}}`);
+      const meta = getMeta(element);
+      if (meta) {
+        meta.fieldKey = key;
+        meta.name = key;
+      }
+      addElement(canvas, element);
+      element.initDimensions();
+      canvas.requestRenderAll();
+      refresh();
+    },
+    [canvasRef, refresh],
+  );
+
+  /** A QR whose payload becomes each row's value — the scannable student id. */
+  const addDataQr = useCallback(
+    async (key: string) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+
+      const element = await createQrElement({
+        ...DEFAULT_QR_CONFIG,
+        website: `{{${key}}}`,
+        transparentBackground: true,
+      });
+      if (!element) return;
+
+      const meta = getMeta(element);
+      if (meta) {
+        meta.fieldKey = key;
+        meta.name = key;
+      }
+      addElement(canvas, element);
       refresh();
     },
     [canvasRef, refresh],
@@ -226,6 +277,8 @@ export function useCanvasActions() {
 
   return {
     addText,
+    addDataField,
+    addDataQr,
     addShape,
     addIcon,
     addImage,

@@ -74,9 +74,9 @@ export function selectSides(
  * A null scene is a side that was never drawn on. It still renders: a blank
  * back is a legitimate thing to send to a printer.
  */
-async function renderScene(
+export async function renderScene(
   scene: SceneJSON | null,
-  options: ExportOptions,
+  options: Pick<ExportOptions, "transparent" | "format">,
 ): Promise<StaticCanvas> {
   if (scene) await Promise.all(collectFontFamilies(scene).map(loadFont));
 

@@ -8,6 +8,7 @@ import {
   CopyPlus,
   LayoutGrid,
   Redo2,
+  Sheet,
   Trash2,
   Undo2,
 } from "lucide-react";
@@ -108,6 +109,15 @@ export function Toolbar() {
         </Link>
         <LocaleToggle compact />
         <ThemeToggle />
+        {/* Batch generation: one design, a roster, N cards. */}
+        <Link
+          href="/generate"
+          aria-label={dictionary.generate.toolbarLabel}
+          title={dictionary.generate.toolbarLabel}
+          className="grid h-8 w-8 place-items-center rounded-md text-ink-600 transition-colors hover:bg-ink-100 hover:text-ink-900"
+        >
+          <Sheet className="h-4 w-4" />
+        </Link>
         {/* Returns here after signing in, so a design in progress is not lost. */}
         <AuthNavAction next="/editor" />
         <DownloadMenu />
