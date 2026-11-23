@@ -39,3 +39,13 @@ export class Template {
 export type TemplateDocument = HydratedDocument<Template>;
 
 export const TemplateSchema = SchemaFactory.createForClass(Template);
+
+/*
+ * Backs the `$text` search in TemplatesService.list. Without it, any request
+ * with `?search=` fails in MongoDB ("text index required") and answers 500.
+ * A name match outranks a tag match.
+ */
+TemplateSchema.index(
+  { name: "text", tags: "text" },
+  { weights: { name: 3, tags: 1 }, name: "template_text_search" },
+);

@@ -4,6 +4,7 @@ import { JwtModule } from "@nestjs/jwt";
 import { ThrottlerModule } from "@nestjs/throttler";
 import { JwtAuthGuard } from "./common/guards/jwt-auth.guard";
 import { DatabaseModule } from "./config/database.module";
+import { AdminModule } from "./modules/admin/admin.module";
 import { AuthModule } from "./modules/auth/auth.module";
 import { DesignsModule } from "./modules/designs/designs.module";
 import { HealthModule } from "./modules/health/health.module";
@@ -33,6 +34,7 @@ import { UsersModule } from "./modules/users/users.module";
     AuthModule,
     HealthModule,
     TemplatesModule,
+    AdminModule,
   ],
   providers: [{ provide: APP_GUARD, useClass: JwtAuthGuard }],
 })

@@ -146,6 +146,27 @@ Without `SMTP_USER`/`SMTP_PASS` the mailer writes to the server log instead of
 sending, which is convenient in development. Production refuses to start
 without them: a reset link that cannot be delivered is a locked-out user.
 
+### Admins
+
+Admin routes live under `/api/admin` and carry `@AdminOnly()` on the
+controller, so anything added there is admin-only by default. `AdminGuard`
+reads the role from the database on every admin request rather than trusting
+the access token's claim, which can be up to `ACCESS_TOKEN_TTL` old — a
+demoted or deactivated admin loses access on their next request, not 15
+minutes later.
+
+The first admin is made from the command line, after that account has signed
+up:
+
+```bash
+cd server && npm run make-admin -- someone@example.com
+cd server && npm run make-admin -- --revoke someone@example.com
+```
+
+The script refuses to remove the last active admin. Every admin change, from
+the API or the script, is written to the append-only `adminActions`
+collection.
+
 ### Designs and guests
 
 A design belongs to an account **or** to a browser — exactly one of `owner` and

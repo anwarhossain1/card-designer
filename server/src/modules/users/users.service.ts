@@ -2,7 +2,7 @@ import { ConflictException, Injectable } from "@nestjs/common";
 import { InjectModel } from "@nestjs/mongoose";
 import bcrypt from "bcrypt";
 import type { Model } from "mongoose";
-import { User, type UserDocument } from "./user.schema";
+import { User, type UserDocument, type UserRole } from "./user.schema";
 
 /** Matches the choto-url backend, which is the only reason to prefer 12. */
 const BCRYPT_ROUNDS = 12;
@@ -149,6 +149,22 @@ export class UsersService {
 
   findById(id: string) {
     return this.users.findById(id).exec();
+  }
+
+  async setRole(userId: string, role: UserRole): Promise<void> {
+    await this.users.updateOne({ _id: userId }, { $set: { role } }).exec();
+  }
+
+  /** Guards "don't remove the last admin" — a lockout nothing could undo. */
+  countActiveAdmins(): Promise<number> {
+    return this.users
+      .countDocuments({ role: "admin", isActive: true })
+      .exec();
+  }
+
+  /** Just what an access check needs, read fresh rather than from a token. */
+  findAccessById(id: string) {
+    return this.users.findById(id).select("role isActive").lean().exec();
   }
 
   findByIdWithSessions(id: string) {
