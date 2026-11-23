@@ -2,21 +2,20 @@
 
 import {
   createContext,
-  useCallback,
   useContext,
-  useEffect,
   useMemo,
-  useState,
+  useSyncExternalStore,
   type ReactNode,
 } from "react";
-import {
-  DEFAULT_LOCALE,
-  readStoredLocale,
-  storeLocale,
-  type Locale,
-} from "@/lib/i18n/config";
+import type { Locale } from "@/lib/i18n/config";
 import { en, type Dictionary } from "@/lib/i18n/dictionaries/en";
 import { bn } from "@/lib/i18n/dictionaries/bn";
+import {
+  getLocale,
+  getServerLocale,
+  setLocale,
+  subscribeLocale,
+} from "@/lib/i18n/store";
 
 const DICTIONARIES: Record<Locale, Dictionary> = { en, bn };
 
@@ -27,43 +26,37 @@ interface I18nValue {
   setLocale: (locale: Locale) => void;
 }
 
-const I18nContext = createContext<I18nValue | null>(null);
+/** Only marks that the provider is present; the locale lives in the store. */
+const I18nContext = createContext(false);
 
 /**
  * Client-side localisation.
  *
- * Renders the default locale first and adopts the stored choice in an effect,
- * so server and client markup match. A visitor who chose English therefore
- * sees one frame of Bangla — the accepted cost of switching without changing
- * the URL. Moving to /en later means adding a route segment, not rewriting
- * these dictionaries.
+ * The server renders the default locale. Each component reads the locale
+ * itself through `useSyncExternalStore`, so anything hydrating — however late,
+ * Suspense boundaries included — hydrates with the server's locale and then
+ * switches, instead of hydrating straight into the stored choice and failing
+ * to match the HTML. A visitor who chose English therefore still sees one
+ * frame of Bangla on a full page load (the accepted cost of switching without
+ * changing the URL); client-side navigations render their choice directly.
+ * Moving to /en later means adding a route segment, not rewriting these
+ * dictionaries.
  */
 export function I18nProvider({ children }: { children: ReactNode }) {
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
-
-  useEffect(() => {
-    setLocaleState(readStoredLocale());
-  }, []);
-
-  const setLocale = useCallback((next: Locale) => {
-    storeLocale(next);
-    setLocaleState(next);
-  }, []);
-
-  const value = useMemo(
-    () => ({ locale, t: DICTIONARIES[locale], setLocale }),
-    [locale, setLocale],
-  );
-
-  return <I18nContext.Provider value={value}>{children}</I18nContext.Provider>;
+  return <I18nContext.Provider value>{children}</I18nContext.Provider>;
 }
 
 export function useI18n(): I18nValue {
-  const context = useContext(I18nContext);
-  if (!context) {
+  if (!useContext(I18nContext)) {
     throw new Error("useI18n must be used inside <I18nProvider>");
   }
-  return context;
+
+  const locale = useSyncExternalStore(subscribeLocale, getLocale, getServerLocale);
+
+  return useMemo(
+    () => ({ locale, t: DICTIONARIES[locale], setLocale }),
+    [locale],
+  );
 }
 
 /** Shorthand for components that only need the strings. */
