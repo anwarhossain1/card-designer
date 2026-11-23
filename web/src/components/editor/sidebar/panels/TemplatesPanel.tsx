@@ -11,6 +11,10 @@ import { useT } from "@/components/i18n/I18nProvider";
 import { TEMPLATES } from "@/lib/templates";
 import { renderTemplatePreview } from "@/lib/templates/preview";
 import type { CardTemplate } from "@/types/template";
+import { useServerTemplateList } from "@/hooks/useServerTemplates";
+import { useSession } from "@/hooks/useSession";
+import { SaveTemplateForm } from "./SaveTemplateForm";
+import { ServerTemplateCard } from "./ServerTemplateCard";
 
 function TemplateCard({ template }: { template: CardTemplate }) {
   const t = useT().editor.templates;
@@ -75,6 +79,8 @@ function TemplateCard({ template }: { template: CardTemplate }) {
 export function TemplatesPanel() {
   const t = useT().editor.templates;
   const { canvasRef } = useCanvas();
+  const { user } = useSession();
+  const serverTemplates = useServerTemplateList().data ?? [];
   // No confirm dialog: applying is a single undoable step, and the notice says so.
   const hasContent = (canvasRef.current?.getObjects().length ?? 0) > 0;
 
@@ -94,6 +100,21 @@ export function TemplatesPanel() {
         ))}
       </ul>
 
+      {serverTemplates.length > 0 ? (
+        <>
+          <h3 className="pt-1 text-[11px] font-semibold uppercase tracking-[0.1em] text-ink-400">
+            {t.more}
+          </h3>
+          <ul className="space-y-3">
+            {serverTemplates.map((template) => (
+              <li key={template.slug}>
+                <ServerTemplateCard template={template} />
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : null}
+
       <Button
         size="sm"
         variant="outline"
@@ -110,6 +131,9 @@ export function TemplatesPanel() {
         <FilePlus2 className="h-4 w-4" />
         {t.blank}
       </Button>
+
+      {/* A display decision only; the API refuses non-admins regardless. */}
+      {user?.role === "admin" ? <SaveTemplateForm /> : null}
     </div>
   );
 }

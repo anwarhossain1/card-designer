@@ -29,7 +29,8 @@ even when `MONGODB_URI` is unset.
 ```
 web/src/
 ├─ app/                  routes: / · /editor · /designs · /sign-in · /sign-up
-│                        /forgot-password · /reset-password
+│                        /forgot-password · /reset-password · /generate
+│                        /admin · /admin/users · /admin/templates
 │  ├─ layout.tsx         fonts, metadata, providers
 │  └─ providers.tsx      React Query
 ├─ components/
@@ -188,6 +189,15 @@ authored by designing a card in the editor; the slugs of the five bundled
 templates are reserved. Browsing other people's designs is deliberately not
 part of the admin API.
 
+In the web app, `/admin` (overview, users, templates) is reached from the
+account menu and asks `/admin/session` before rendering anything — a
+convenience, since the API is what refuses non-admins. Admins get "Save as
+template" at the foot of the editor's Templates panel, which saves both sides
+as a draft. Published templates appear under the five bundled ones and load
+through the same JSON path as a saved design; `/editor?template=<slug>` checks
+the bundled set first, then the server. Applying one replaces the front as a
+single undoable step, and the back too when the template has one.
+
 ### Designs and guests
 
 A design belongs to an account **or** to a browser — exactly one of `owner` and
@@ -213,9 +223,9 @@ id is self-issued by anyone who can set a cookie.
 A vector PDF — text is still rendered at 300 DPI and rasterised, which softens
 slightly in print. Renaming from the designs grid; the editor's name field is
 the only way, and it is the natural place for it. Google sign-in, email
-verification, collaboration, print ordering, payments, template marketplace,
-and templates that carry a matching back in the web app (the API stores
-them; the editor does not read server templates yet). Export still trims at
+verification, collaboration, print ordering, payments, and a template
+marketplace. Editing an admin template's design after it is saved — today it
+is re-saved under a new slug and the old one deleted. Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.
