@@ -24,7 +24,13 @@ export class TemplatesService {
     if (query.category) filter.category = query.category;
     if (query.search) filter.$text = { $search: query.search };
 
-    return this.templates.find(filter).sort({ createdAt: -1 }).lean();
+    // Scenes are the heavy part and a catalogue grid shows thumbnails; the
+    // editor fetches one template's sides by slug when it is applied.
+    return this.templates
+      .find(filter)
+      .select("-sides")
+      .sort({ createdAt: -1 })
+      .lean();
   }
 
   async findBySlug(slug: string) {

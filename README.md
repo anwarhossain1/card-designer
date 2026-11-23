@@ -167,6 +167,27 @@ The script refuses to remove the last active admin. Every admin change, from
 the API or the script, is written to the append-only `adminActions`
 collection.
 
+| Route | What it does |
+| --- | --- |
+| `GET /admin/session` | The signed-in admin; 403 for anyone else |
+| `GET /admin/users` | Search by name or email, filter by role or status, paged |
+| `GET /admin/users/:id` | One account, with design count and active sessions |
+| `PATCH /admin/users/:id/status` | `{ active }` — deactivating also signs the account out everywhere |
+| `PATCH /admin/users/:id/role` | `{ role }` — `user` or `admin` |
+| `POST /admin/users/:id/password-reset` | Sends the normal reset email; the admin never sees the link |
+| `GET /admin/templates` | All templates, drafts included, without scenes |
+| `GET /admin/templates/:slug` | One template with its sides |
+| `POST /admin/templates` | Create; starts as a draft unless `published` is set |
+| `PATCH /admin/templates/:slug` | Partial update; `{ published: true }` makes it live. The slug cannot change |
+| `DELETE /admin/templates/:slug` | Hard delete; saved designs only remember the slug |
+| `GET /admin/stats` | User, design and template counts, and 30 days of sign-ups (UTC) |
+
+Admins cannot change their own role or status. A template's `sides` use the
+same `{ id, scene }` shape as a saved design, front first, so a template is
+authored by designing a card in the editor; the slugs of the five bundled
+templates are reserved. Browsing other people's designs is deliberately not
+part of the admin API.
+
 ### Designs and guests
 
 A design belongs to an account **or** to a browser — exactly one of `owner` and
@@ -193,7 +214,8 @@ A vector PDF — text is still rendered at 300 DPI and rasterised, which softens
 slightly in print. Renaming from the designs grid; the editor's name field is
 the only way, and it is the natural place for it. Google sign-in, email
 verification, collaboration, print ordering, payments, template marketplace,
-and templates that carry a matching back. Export still trims at
+and templates that carry a matching back in the web app (the API stores
+them; the editor does not read server templates yet). Export still trims at
 the card edge — bleed and crop marks are configured but not yet emitted. The
 document model, module boundaries and API envelope are shaped to absorb these
 without a rewrite.

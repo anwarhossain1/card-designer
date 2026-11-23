@@ -28,11 +28,30 @@ export class Template {
   @Prop({ type: [String], default: [], index: true })
   tags!: string[];
 
-  /** Serialized Fabric scene; opaque to the API. */
-  @Prop({ type: MongooseSchema.Types.Mixed, required: true })
-  scene!: unknown;
+  @Prop({ default: "" })
+  description!: string;
 
-  @Prop({ default: true, index: true })
+  /** Font families the layout uses; the editor loads them before measuring. */
+  @Prop({ type: [String], default: [] })
+  fonts!: string[];
+
+  /**
+   * One serialized Fabric scene per side, in the same `{ id, scene }` shape a
+   * saved design uses — a template is authored by designing a card in the
+   * editor. Front is required, back optional. Opaque to the API.
+   */
+  @Prop({ type: MongooseSchema.Types.Mixed, required: true })
+  sides!: unknown;
+
+  /** A small JPEG data URL of the front, for the catalogue grid. */
+  @Prop({ type: String, default: null })
+  thumbnail!: string | null;
+
+  /**
+   * New templates start as drafts: only an admin can see one until it is
+   * published, so a half-finished template never reaches the catalogue.
+   */
+  @Prop({ default: false, index: true })
   published!: boolean;
 }
 

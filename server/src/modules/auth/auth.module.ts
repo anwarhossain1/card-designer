@@ -15,6 +15,7 @@ import { TokensService } from "./tokens.service";
   imports: [UsersModule, DesignsModule, MailModule, JwtModule.register({})],
   controllers: [AuthController],
   providers: [AuthService, TokensService],
-  exports: [TokensService],
+  // AuthService: the admin API sends password resets through the same flow.
+  exports: [TokensService, AuthService],
 })
 export class AuthModule {}
