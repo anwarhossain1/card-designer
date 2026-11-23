@@ -48,5 +48,6 @@ export async function apiRequest<T>(
     throw new ApiError(message, response.status);
   }
 
-  return (payload as { data: T }).data;
+  // A 204 has no body at all, so there is no envelope to unwrap.
+  return (payload as { data: T } | null)?.data as T;
 }

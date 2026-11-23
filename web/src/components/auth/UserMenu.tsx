@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { LayoutGrid, Loader2, LogOut } from "lucide-react";
+import { LayoutGrid, Loader2, LogOut, ShieldCheck } from "lucide-react";
 import { cn } from "@/lib/utils/cn";
 import { useT } from "@/components/i18n/I18nProvider";
 import { useLogout } from "@/hooks/useSession";
@@ -76,6 +76,19 @@ export function UserMenu({ user }: { user: AuthUser }) {
               <LayoutGrid className="h-4 w-4" />
               {dictionary.designs.title}
             </Link>
+
+            {/* Shown from the session's role; /admin re-checks with the server. */}
+            {user.role === "admin" ? (
+              <Link
+                href="/admin"
+                role="menuitem"
+                onClick={() => setIsOpen(false)}
+                className="flex w-full items-center gap-2 rounded-lg px-2.5 py-2 text-sm text-ink-700 transition-colors hover:bg-ink-100"
+              >
+                <ShieldCheck className="h-4 w-4" />
+                {dictionary.admin.title}
+              </Link>
+            ) : null}
 
             <button
               type="button"

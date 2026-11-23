@@ -3,6 +3,7 @@ import { editor } from "./editor";
 import { auth } from "./auth";
 import { designs } from "./designs";
 import { generate } from "./generate";
+import { admin } from "./admin";
 
 export const en = {
   common: {
@@ -14,6 +15,7 @@ export const en = {
   auth,
   designs,
   generate,
+  admin,
 };
 
 /**

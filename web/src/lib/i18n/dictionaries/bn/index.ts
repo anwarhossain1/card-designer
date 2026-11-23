@@ -4,6 +4,7 @@ import { editor } from "./editor";
 import { auth } from "./auth";
 import { designs } from "./designs";
 import { generate } from "./generate";
+import { admin } from "./admin";
 
 export const bn: Dictionary = {
   common: {
@@ -15,4 +16,5 @@ export const bn: Dictionary = {
   auth,
   designs,
   generate,
+  admin,
 };
